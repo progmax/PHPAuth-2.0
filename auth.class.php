@@ -344,8 +344,10 @@ class Auth
 	{
 		include("config.php");
 	
-		// It should be : $enc = hash_pbkdf2("SHA512", base64_encode(str_rot13(hash("SHA512", str_rot13($auth_conf['salt_1'] . $string . $auth_conf['salt_2'])))), $auth_conf['salt_3'], 50000, 128);
-		$enc = hash("SHA512", base64_encode(str_rot13(hash("SHA512", str_rot13($auth_conf['salt_1'] . $string . $auth_conf['salt_2'])))));
+		$enc = hash_pbkdf2("SHA512", base64_encode(str_rot13(hash("SHA512", str_rot13($auth_conf['salt_1'] . $string . $auth_conf['salt_2'])))), $auth_conf['salt_3'], 50000, 128);
+		// If you don't have hash_pbkdf2 on your server use the following instead :
+		// $enc = hash("SHA512", base64_encode(str_rot13(hash("SHA512", str_rot13($auth_conf['salt_1'] . $string . $auth_conf['salt_2'])))));
+		
 		return $enc;
 	}
 	
