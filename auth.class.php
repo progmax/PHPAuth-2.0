@@ -129,9 +129,9 @@ class Auth
 				{
 					if(!$this->isUsernameTaken($username))
 					{
-						$data = $this->addUser($email, $username, $password);
+						$uid = $this->addUser($email, $username, $password);
 						
-						$this->addNewLog($data['uid'], "REGISTER_SUCCESS", "Account created successfully, activation email sent. Activekey : " . $data['activekey']);
+						$this->addNewLog($uid, "REGISTER_SUCCESS", "Account created successfully, activation email sent.");
 						
 						$return['code'] = 4;
 						$return['email'] = $email;
