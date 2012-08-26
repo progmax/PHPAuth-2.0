@@ -39,8 +39,8 @@ $auth_conf['reset_email']['subj'] = "PHPAuth 2.0 : Password reset request";
 $auth_conf['reset_email']['body'] = "Hello,<br/><br/>" . "\r\n";
 $auth_conf['reset_email']['body'] .= "You recently requested a password reset request at PHPAuth 2.0.<br/>" . "\r\n";
 $auth_conf['reset_email']['body'] .= "To procede with resetting your password, click the following link :<br/><br/>" . "\r\n";
-$auth_conf['reset_email']['body'] .= "<strong><a href=\"" . $auth_conf['base_url'] . "?page=reset-2&key={key}\" target=\_blank\">Reset my password</a></strong><br/><br/>" . "\r\n";
-$auth_conf['reset_email']['body'] .= "Or alternatively, go to <a href=\"" . $auth_conf['base_url'] . "?page=reset-2\" target=\"_blank\">this page</a> and paste the following code : <strong>{key}</strong><br/><br/>" . "\r\n";
+$auth_conf['reset_email']['body'] .= "<strong><a href=\"" . $auth_conf['base_url'] . "?page=reset&step=2&key={key}\" target=\_blank\">Reset my password</a></strong><br/><br/>" . "\r\n";
+$auth_conf['reset_email']['body'] .= "Or alternatively, go to <a href=\"" . $auth_conf['base_url'] . "?page=reset&step=2\" target=\"_blank\">this page</a> and paste the following code : <strong>{key}</strong><br/><br/>" . "\r\n";
 $auth_conf['reset_email']['body'] .= "Reminder : This unique reset key will expire within 24 hours of the password reset request." . "\r\n";
 // Password reset email headers
 $auth_conf['reset_email']['head']  = 'From: PHPAuth 2.0 <no-reply@phpauth.cuonic.com>' . "\r\n";
