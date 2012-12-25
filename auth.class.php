@@ -12,7 +12,8 @@ class Auth
 	{
 		include("config.php");
 	
-		$this->mysqli = new mysqli($db['host'], $db['user'], $db['pass'], $db['name']); 
+		$this->mysqli = new mysqli($db['host'], $db['user'], $db['pass'], $db['name']);
+		unset($db['pass']);
 	}
 	
 	/*
