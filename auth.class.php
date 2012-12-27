@@ -346,9 +346,12 @@ class Auth
 		include("config.php");
 	
 		// If you can use the following line :
-		// $enc = hash_pbkdf2("SHA512", base64_encode(str_rot13(hash("SHA512", str_rot13($auth_conf['salt_1'] . $string . $auth_conf['salt_2'])))), $auth_conf['salt_3'], 50000, 128);
-		// If the above line spits out errors, use the following line :
-		$enc = hash("SHA512", base64_encode(str_rot13(hash("SHA512", str_rot13($auth_conf['salt_1'] . $string . $auth_conf['salt_2'])))));
+		if (strnatcmp(phpversion(),'5.5.0') >= 0) {
+			$enc = hash_pbkdf2("SHA512", base64_encode(str_rot13(hash("SHA512", str_rot13($auth_conf['salt_1'] . $string . $auth_conf['salt_2'])))), $auth_conf['salt_3'], 50000, 128);
+		} else {
+			// If the above line spits out errors, use the following line :
+			$enc = hash("SHA512", base64_encode(str_rot13(hash("SHA512", str_rot13($auth_conf['salt_1'] . $string . $auth_conf['salt_2'])))));
+		}
 		return $enc;
 	}
 	
