@@ -27,18 +27,26 @@ class Auth
 	{
 		$return = array();
 		
-		if($this->isBlocked($_SERVER['REMOTE_ADDR']))
+    		$ip = $_SERVER['REMOTE_ADDR'];
+ 
+   		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        		$ip = $_SERVER['HTTP_CLIENT_IP'];
+   		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    		}		
+		
+		if($this->isBlocked($ip))
 		{
 			$return['code'] = 0;
 			return $return;
 		}
 		else
 		{
-			if(strlen($username) == 0) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($username) > 30) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($username) < 3) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($password) == 0) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($password) != 40) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
+			if(strlen($username) == 0) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($username) > 30) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($username) < 3) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($password) == 0) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($password) != 40) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
 			else
 			{
 				$plainpass = $password;
@@ -61,7 +69,7 @@ class Auth
 						}
 						else
 						{
-							$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+							$this->addAttempt($ip); 
 						
 							$this->addNewLog($userdata['uid'], "LOGIN_FAIL_NONACTIVE", "Account inactive");
 						
@@ -72,7 +80,7 @@ class Auth
 					}
 					else
 					{
-						$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+						$this->addAttempt($ip); 
 					
 						$this->addNewLog($userdata['uid'], "LOGIN_FAIL_PASSWORD", "Password incorrect : {$plainpass}");
 					
@@ -83,7 +91,7 @@ class Auth
 				}
 				else
 				{
-					$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+					$this->addAttempt($ip); 
 				
 					$this->addNewLog("", "LOGIN_FAIL_USERNAME", "Attempted login with the username : {$username} -> Username doesn't exist in DB");
 				
@@ -107,21 +115,29 @@ class Auth
 	{
 		$return = array();
 		
-		if($this->isBlocked($_SERVER['REMOTE_ADDR']))
+    		$ip = $_SERVER['REMOTE_ADDR'];
+ 
+    		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        		$ip = $_SERVER['HTTP_CLIENT_IP'];
+    		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    		}		
+		
+		if($this->isBlocked($ip))
 		{
 			$return['code'] = 0;
 			return $return;
 		}
 		else
 		{
-			if(strlen($email) == 0) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($email) > 100) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($email) < 3) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($username) == 0) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($username) > 30) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($username) < 3) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($password) != 40) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
+			if(strlen($email) == 0) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($email) > 100) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($email) < 3) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($username) == 0) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($username) > 30) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($username) < 3) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($password) != 40) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
 			else
 			{
 				$password = $this->getHash($password);
@@ -141,7 +157,7 @@ class Auth
 					}
 					else
 					{
-						$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+						$this->addAttempt($ip); 
 					
 						$this->addNewLog("", "REGISTER_FAIL_USERNAME", "User attempted to register new account with the username : {$username} -> Username already in use");
 					
@@ -151,7 +167,7 @@ class Auth
 				}
 				else
 				{
-					$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+					$this->addAttempt($ip); 
 				
 					$this->addNewLog("", "REGISTER_FAIL_EMAIL", "User attempted to register new account with the email : {$email} -> Email already in use");
 				
@@ -172,15 +188,23 @@ class Auth
 	{
 		$return = array();
 		
-		if($this->isBlocked($_SERVER['REMOTE_ADDR']))
+		$ip = $_SERVER['REMOTE_ADDR'];
+			 
+		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+			$ip = $_SERVER['HTTP_CLIENT_IP']	
+		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		}		
+		
+		if($this->isBlocked($ip))
 		{
 			$return['code'] = 0;
 			return $return;
 		}
 		else
 		{
-			if(strlen($activekey) > 20) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($activekey) < 20) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
+			if(strlen($activekey) > 20) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($activekey) < 20) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
 			else
 			{
 				$query = $this->mysqli->prepare("SELECT uid, expiredate FROM activations WHERE activekey = ?");
@@ -194,7 +218,7 @@ class Auth
 				
 				if($count == 0)
 				{
-					$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+					$this->addAttempt($ip); 
 				
 					$this->addNewLog("", "ACTIVATE_FAIL_ACTIVEKEY", "User attempted to activate an account with the key : {$activekey} -> Activekey not found in database");
 					
@@ -226,7 +250,7 @@ class Auth
 						}
 						else
 						{
-							$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+							$this->addAttempt($ip);
 						
 							$this->addNewLog($uid, "ACTIVATE_FAIL_EXPIRED", "User attempted to activate account with key : {$activekey} -> Key expired");
 						
@@ -238,7 +262,7 @@ class Auth
 					}
 					else
 					{
-						$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+						$this->addAttempt($ip); 
 					
 						$this->deleteUserActivations($uid);
 					
@@ -262,17 +286,25 @@ class Auth
 	{
 		$return = array();
 		
-		if($this->isBlocked($_SERVER['REMOTE_ADDR']))
+		$ip = $_SERVER['REMOTE_ADDR'];
+		
+		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+			$ip = $_SERVER['HTTP_CLIENT_IP'];
+		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		}		
+		
+		if($this->isBlocked($ip))
 		{
 			$return['code'] = 0;
 			return $return;
 		}
 		else
 		{
-			if(strlen($email) == 0) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($email) > 100) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($email) < 3) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
+			if(strlen($email) == 0) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($email) > 100) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($email) < 3) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
 			else
 			{
 				$query = $this->mysqli->prepare("SELECT id FROM users WHERE email = ?");
@@ -286,7 +318,7 @@ class Auth
 				
 				if($count == 0)
 				{
-					$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+					$this->addAttempt($ip); 
 				
 					$this->addNewLog("", "REQUESTRESET_FAIL_EMAIL", "User attempted to reset the password for the email : {$email} -> Email doesn't exist in DB");
 					
@@ -306,7 +338,7 @@ class Auth
 					}
 					else
 					{
-						$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+						$this->addAttempt($ip);
 					
 						$this->addNewLog($uid, "REQUESTRESET_FAIL_EXIST", "User attempted to reset the password for the email : {$email} -> A reset request already exists.");
 					
@@ -403,6 +435,12 @@ class Auth
 		$this->deleteExistingSessions($uid);
 		
 		$ip = $_SERVER['REMOTE_ADDR'];
+                if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        		$ip = $_SERVER['HTTP_CLIENT_IP'];
+    		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    		}
+    		
 		$data['expire'] = date("Y-m-d H:i:s", strtotime("+1 month"));
 		
 		$query = $this->mysqli->prepare("INSERT INTO sessions (uid, hash, expiredate, ip, agent) VALUES (?, ?, ?, ?, ?)");
@@ -505,7 +543,14 @@ class Auth
 		elseif(strlen($info) > 1000) { return false; }
 		else
 		{
-			$ip = $_SERVER['REMOTE_ADDR'];
+    			
+    			$ip = $_SERVER['REMOTE_ADDR'];
+ 
+    			if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        			$ip = $_SERVER['HTTP_CLIENT_IP'];
+    			} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    			}
 		
 			$query = $this->mysqli->prepare("INSERT INTO log (username, action, info, ip) VALUES (?, ?, ?, ?)");
 			$query->bind_param("ssss", $uid, $action, $info, $ip);
@@ -524,7 +569,15 @@ class Auth
 	
 	public function checkSession($hash)
 	{
-		if($this->isBlocked($_SERVER['REMOTE_ADDR']))
+
+		$ip = $_SERVER['REMOTE_ADDR'];
+ 	    	if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+	        	$ip = $_SERVER['HTTP_CLIENT_IP'];
+	    	} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+	        	$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+	   	}
+			   	
+		if($this->isBlocked($ip))
 		{
 			return false;
 		}
@@ -551,7 +604,8 @@ class Auth
 			}
 			else
 			{
-				if($_SERVER['REMOTE_ADDR'] != $db_ip)
+			   	
+				if($ip != $db_ip)
 				{
 					if($_SERVER['HTTP_USER_AGENT'] != $db_agent)
 					{
@@ -580,7 +634,7 @@ class Auth
 						}
 						else 
 						{
-							$this->updateSessionIp($sid, $_SERVER['REMOTE_ADDR']);
+							$this->updateSessionIp($sid, $ip);
 						
 							return true;
 						}
@@ -901,15 +955,23 @@ class Auth
 	{
 		$return = array();
 		
-		if($this->isBlocked($_SERVER['REMOTE_ADDR']))
+		$ip = $_SERVER['REMOTE_ADDR'];
+ 
+    		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        		$ip = $_SERVER['HTTP_CLIENT_IP'];
+    		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+   		}
+		
+		if($this->isBlocked($ip))
 		{
 			$return['code'] = 0;
 			return $return;
 		}
 		else
 		{
-			if(strlen($key) > 20) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($key) < 20) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
+			if(strlen($key) > 20) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($key) < 20) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
 			else
 			{
 				$query = $this->mysqli->prepare("SELECT uid, expiredate FROM resets WHERE resetkey = ?");
@@ -923,7 +985,7 @@ class Auth
 				
 				if($count == 0)
 				{
-					$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+					$this->addAttempt($ip); 
 				
 					$return['code'] = 2;
 					return $return;
@@ -935,7 +997,7 @@ class Auth
 				
 					if($currentdate > $expiredate)
 					{
-						$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+						$this->addAttempt($ip); 
 					
 						$this->deleteUserResets($uid);
 					
@@ -964,14 +1026,22 @@ class Auth
 	{
 		$return = array();
 		
-		if($this->isBlocked($_SERVER['REMOTE_ADDR']))
+     		$ip = $_SERVER['REMOTE_ADDR'];
+ 
+    		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        		$ip = $_SERVER['HTTP_CLIENT_IP'];
+    		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    		}		
+		
+		if($this->isBlocked($ip))
 		{
 			$return['code'] = 0;
 			return $return;
 		}
 		else
 		{
-			if(strlen($password) != 40) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
+			if(strlen($password) != 40) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
 
 			$data = $this->isResetValid($key);
 			
@@ -990,7 +1060,7 @@ class Auth
 				
 				if($count == 0)
 				{
-					$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+					$this->addAttempt($ip); 
 				
 					$this->deleteUserResets($data['uid']);
 					
@@ -1003,7 +1073,7 @@ class Auth
 				{
 					if($db_password == $password)
 					{
-						$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+						$this->addAttempt($ip); 
 					
 						$this->addNewLog($data['uid'], "RESETPASS_FAIL_SAMEPASS", "User attempted to reset password with key : {$key} -> New password matches previous password !");
 					
@@ -1048,17 +1118,25 @@ class Auth
 	{
 		$return = array();
 		
-		if($this->isBlocked($_SERVER['REMOTE_ADDR']))
+    		$ip = $_SERVER['REMOTE_ADDR'];
+ 
+    		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+       			 $ip = $_SERVER['HTTP_CLIENT_IP'];
+    		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+       			 $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+	    	}		
+		
+		if($this->isBlocked($ip))
 		{
 			$return['code'] = 0;
 			return $return;
 		}
 		else
 		{
-			if(strlen($email) == 0) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($email) > 100) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($email) < 3) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
+			if(strlen($email) == 0) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($email) > 100) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($email) < 3) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
 			else
 			{
 				$query = $this->mysqli->prepare("SELECT id FROM users WHERE email = ?");
@@ -1072,7 +1150,7 @@ class Auth
 				
 				if($count == 0)
 				{
-					$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+					$this->addAttempt($ip); 
 				
 					$this->addNewLog("", "RESENDACTIVATION_FAIL_EMAIL", "User attempted to resend activation email for the email : {$email} -> Email doesn't exist in DB !");
 				
@@ -1083,7 +1161,7 @@ class Auth
 				{
 					if($this->isUserActivated($uid))
 					{
-						$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+						$this->addAttempt($ip); 
 					
 						$this->addNewLog($uid, "RESENDACTIVATION_FAIL_ACTIVATED", "User attempted to resend activation email for the email : {$email} -> Account is already activated !");
 					
@@ -1101,7 +1179,7 @@ class Auth
 						}
 						else
 						{
-							$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+							$this->addAttempt($ip); 
 						
 							$this->addNewLog($uid, "RESENDACTIVATION_FAIL_EXIST", "User attempted to resend activation email for the email : {$email} -> Activation request already exists. 24 hour expire wait required !");
 							
@@ -1156,16 +1234,24 @@ class Auth
 	public function changePassword($uid, $currpass, $newpass)
 	{
 		$return = array();
+		
+    		$ip = $_SERVER['REMOTE_ADDR'];
+ 
+    		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        		$ip = $_SERVER['HTTP_CLIENT_IP'];
+    		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    		}		
 	
-		if($this->isBlocked($_SERVER['REMOTE_ADDR']))
+		if($this->isBlocked($ip))
 		{
 			$return['code'] = 0;
 			return $return;
 		}
 		else
 		{
-			if(strlen($currpass) != 40) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($newpass) != 40) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
+			if(strlen($currpass) != 40) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($newpass) != 40) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
 			else
 			{
 				$currpass = $this->getHash($currpass);
@@ -1182,7 +1268,7 @@ class Auth
 				
 				if($count == 0)
 				{
-					$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+					$this->addAttempt($ip); 
 				
 					$this->addNewLog($uid, "CHANGEPASS_FAIL_UID", "User attempted to change password for the UID : {$uid} -> UID doesn't exist !");
 				
@@ -1207,7 +1293,7 @@ class Auth
 						}
 						else
 						{
-							$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+							$this->addAttempt($ip); 
 						
 							$this->addNewLog($uid, "CHANGEPASS_FAIL_PASSWRONG", "User attempted to change password for the UID : {$uid} -> Current password incorrect !");
 						
@@ -1217,7 +1303,7 @@ class Auth
 					}
 					else
 					{
-						$this->addAttempt($_SERVER['REMOTE_ADDR']);
+						$this->addAttempt($ip);
 					
 						$this->addNewLog($uid, "CHANGEPASS_FAIL_PASSMATCH", "User attempted to change password for the UID : {$uid} -> New password matches current password !");
 					
@@ -1268,18 +1354,27 @@ class Auth
 	{
 		$return = array();
 		
-		if($this->isBlocked($_SERVER['REMOTE_ADDR']))
+    		$ip = $_SERVER['REMOTE_ADDR'];
+ 
+    		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+			$ip = $_SERVER['HTTP_CLIENT_IP'];
+    		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    		}		
+		
+		
+		if($this->isBlocked($ip))
 		{
 			$return['code'] = 0;
 			return $return;
 		}
 		else
 		{
-			if(strlen($email) == 0) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($email) > 100) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($email) < 3) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
-			elseif(strlen($password) != 40) { $return['code'] = 1; $this->addAttempt($_SERVER['REMOTE_ADDR']); return $return; }
+			if(strlen($email) == 0) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($email) > 100) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($email) < 3) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+			elseif(strlen($password) != 40) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
 			else
 			{	
 				$password = $this->getHash($password);
@@ -1295,7 +1390,7 @@ class Auth
 				
 				if($count == 0)
 				{
-					$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+					$this->addAttempt($ip); 
 				
 					$this->addNewLog($uid, "CHANGEEMAIL_FAIL_UID", "User attempted to change email for the UID : {$uid} -> UID doesn't exist !");
 				
@@ -1308,7 +1403,7 @@ class Auth
 					{
 						if($email == $db_email)
 						{
-							$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+							$this->addAttempt($ip); 
 						
 							$this->addNewLog($uid, "CHANGEEMAIL_FAIL_EMAILMATCH", "User attempted to change email for the UID : {$uid} -> New Email address matches current email !");
 						
@@ -1330,7 +1425,7 @@ class Auth
 					}
 					else
 					{
-						$this->addAttempt($_SERVER['REMOTE_ADDR']); 
+						$this->addAttempt($ip); 
 					
 						$this->addNewLog($uid, "CHANGEEMAIL_FAIL_PASS", "User attempted to change email for the UID : {$uid} -> Password is incorrect !");
 					
