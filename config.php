@@ -32,8 +32,8 @@ $auth_conf['salt_3'] = '63fds.dfhsAdyISs_?&jdUsydbv92bf54ggvc';
 // Auth Email Configuration :
 // ------------------------
 
-if($auth_conf['lang'] == "es")
-{
+switch ($auth_conf['lang']) {
+   case "es":
 
 	// Registration activation email subject
 	$auth_conf['activation_email']['subj'] = "PHPAuth 2.0 : Activacion de cuenta";
@@ -63,9 +63,9 @@ if($auth_conf['lang'] == "es")
 	$auth_conf['reset_email']['head'] .= 'MIME-Version: 1.0' . "\r\n";
 	$auth_conf['reset_email']['head'] .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 
-}
-elseif($auth_conf['lang'] == "fr")
-{
+   break;
+   case "fr":
+
 	// Registration activation email subject
 	$auth_conf['activation_email']['subj'] = "PHPAuth 2.0 : Activation de compte";
 	// Registration activation email body
@@ -93,9 +93,9 @@ elseif($auth_conf['lang'] == "fr")
 	$auth_conf['reset_email']['head']  = 'From: PHPAuth 2.0 <no-reply@phpauth.cuonic.com>' . "\r\n";
 	$auth_conf['reset_email']['head'] .= 'MIME-Version: 1.0' . "\r\n";
 	$auth_conf['reset_email']['head'] .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-}
-else
-{
+   break;
+   default:
+
 	// Registration activation email subject
 	$auth_conf['activation_email']['subj'] = "PHPAuth 2.0 : Account Activation required";
 	// Registration activation email body
@@ -123,7 +123,7 @@ else
 	$auth_conf['reset_email']['head']  = 'From: PHPAuth 2.0 <no-reply@phpauth.cuonic.com>' . "\r\n";
 	$auth_conf['reset_email']['head'] .= 'MIME-Version: 1.0' . "\r\n";
 	$auth_conf['reset_email']['head'] .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-
+   break;
 }
 
 ?>
