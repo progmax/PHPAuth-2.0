@@ -29,9 +29,10 @@ $auth_conf['salt_2'] = 'Yu23ds09*d?u8SDv6sd?usi$_YSdsa24fd+83';
 $auth_conf['salt_3'] = '63fds.dfhsAdyISs_?&jdUsydbv92bf54ggvc';
 // Cookie
 $cookiedomain = ($_SERVER['HTTP_HOST'] != 'localhost') ? $_SERVER['HTTP_HOST'] : false;
-define( 'COOKIE_DOMAIN', $cookiedomain );
-define( 'COOKIE_PATH', '/' );
-define( 'COOKIE_AUTH', 'auth_session' );
+define ('COOKIE_DOMAIN', $cookiedomain);
+define ('COOKIE_PATH', '/');
+define ('COOKIE_AUTH', 'auth_session');
+define ('SECRET_KEY', 'dk;l189654è(tyhj§!dfgdfàzgq_f4fá.'); 
 
 // ------------------------
 // Auth Email Configuration :
