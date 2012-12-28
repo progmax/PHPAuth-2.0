@@ -626,11 +626,14 @@ class Auth
 					}
 					else 
 					{			
+						//cookie validation						
 						$cookie_crc = sha1 ($hash.SITEKEY.$expiredate);
 						if (!empty($cookie_crc) && ($db_cookie == $cookie_crc) 
 						{ 
 							return true;
 						} else {
+							$this->addNewLog($uid, "AUTH_COOKIE_FAIL_BADCRC", "Cookie Integrity failed");
+							
 							return false;
 						}
 					}
