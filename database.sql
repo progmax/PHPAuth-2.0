@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS `resets` (
 CREATE TABLE IF NOT EXISTS `sessions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `uid` int(11) NOT NULL,
-  `hash` varchar(32) CHARACTER SET utf8_bin NOT NULL,
+  `hash` varchar(40) CHARACTER SET utf8_bin NOT NULL,
   `expiredate` datetime NOT NULL,
   `ip` varchar(15) CHARACTER SET utf8_bin NOT NULL,
   `agent` varchar(200) CHARACTER SET utf8_bin NOT NULL,
