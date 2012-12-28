@@ -375,9 +375,9 @@ class Auth
 	
 		$data['username'] = $username;
 	
-		$query = $this->mysqli->prepare("SELECT id, password, email, isactive FROM users WHERE username = ?");
+		$query = $this->mysqli->prepare("SELECT id, password, email, salt, isactive FROM users WHERE username = ?");
 		$query->bind_param("s", $username);
-		$query->bind_result($data['uid'], $data['password'], $data['email'], $data['isactive']);
+		$query->bind_result($data['uid'], $data['password'], $data['email'], $data['salt'], $data['isactive']);
 		$query->execute();
 		$query->store_result();
 		$count = $query->num_rows;
@@ -404,7 +404,14 @@ class Auth
 	{
 		$data = array();
 	
-		$data['hash'] = sha1(microtime());
+		$query = $this->mysqli->prepare("SELECT salt FROM users WHERE id = ?");
+		$query->bind_param("i", $uid);
+		$query->bind_result($data['salt']);
+		$query->execute();
+		$query->store_result();
+		$query->fetch();
+		$query->close();
+		$data['hash'] = sha1($data['salt'].microtime());
 		
 		$agent = $_SERVER['HTTP_USER_AGENT'];
 		
@@ -703,9 +710,11 @@ class Auth
 	{
 		$username = htmlentities($username);
 		$email = htmlentities($email);
-	
-		$query = $this->mysqli->prepare("INSERT INTO users (username, password, email) VALUES (?, ?, ?)");
-		$query->bind_param("sss", $username, $password, $email);
+		
+		$salt = $this->getRandomKey(20);
+		
+		$query = $this->mysqli->prepare("INSERT INTO users (username, password, email, salt) VALUES (?, ?, ?, ?)");
+		$query->bind_param("ssss", $username, $password, $email, $salt);
 		$query->execute();
 		$uid = $query->insert_id;
 		$query->close();

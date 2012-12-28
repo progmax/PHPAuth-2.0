@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `username` varchar(30) CHARACTER SET utf8_bin NOT NULL,
   `password` varchar(128) CHARACTER SET utf8_bin NOT NULL,
   `email` varchar(100) CHARACTER SET utf8_bin NOT NULL,
+  `salt` varchar(20) CHARACTER SET utf8_bin NOT NULL,
   `isactive` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `email` (`email`),
