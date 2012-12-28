@@ -32,7 +32,7 @@ $cookiedomain = ($_SERVER['HTTP_HOST'] != 'localhost') ? $_SERVER['HTTP_HOST'] :
 define ('COOKIE_DOMAIN', $cookiedomain);
 define ('COOKIE_PATH', '/');
 define ('COOKIE_AUTH', 'auth_session');
-define ('SECRET_KEY', 'dk;l189654è(tyhj§!dfgdfàzgq_f4fá.'); 
+define ('SITEKEY', 'dk;l189654è(tyhj§!dfgdfàzgq_f4fá.'); 
 
 // ------------------------
 // Auth Email Configuration :
