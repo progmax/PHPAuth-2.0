@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   `expiredate` datetime NOT NULL,
   `ip` varchar(15) CHARACTER SET utf8_bin NOT NULL,
   `agent` varchar(200) CHARACTER SET utf8_bin NOT NULL,
+  `cookie_crc` varchar(40) CHARACTER SET utf8_bin NOT NULL,
   PRIMARY KEY (`id`),
   KEY `hash` (`hash`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;

@@ -338,7 +338,7 @@ class Auth
 		
 		$this->deleteSession($hash);
 		
-		setcookie("auth_session", $hash, time() - 3600);
+		setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true);
 		
 		return true;
 	}
@@ -412,7 +412,7 @@ class Auth
 		$query->fetch();
 		$query->close();
 		$data['hash'] = sha1($data['salt'].microtime());
-		
+			
 		$agent = $_SERVER['HTTP_USER_AGENT'];
 		
 		$this->deleteExistingSessions($uid);
@@ -420,9 +420,11 @@ class Auth
 		$ip = $this->getIp();
     		
 		$data['expire'] = date("Y-m-d H:i:s", strtotime("+1 month"));
+		$data['cookie_crc'] = sha1 ($data['hash'].SITEKEY.$data['expire']);
 		
-		$query = $this->mysqli->prepare("INSERT INTO sessions (uid, hash, expiredate, ip, agent) VALUES (?, ?, ?, ?, ?)");
-		$query->bind_param("issss", $uid, $data['hash'], $data['expire'], $ip, $agent);
+		
+		$query = $this->mysqli->prepare("INSERT INTO sessions (uid, hash, expiredate, ip, agent, cookie_crc) VALUES (?, ?, ?, ?, ?, ?)");
+		$query->bind_param("isssss", $uid, $data['hash'], $data['expire'], $ip, $agent, $data['cookie_crc']);
 		$query->execute();
 		$query->close();
 		
@@ -550,11 +552,11 @@ class Auth
 		}
 		else
 		{
-			if(strlen($hash) != 40) { setcookie("auth_session", $hash, time() - 3600); return false; }
+			if(strlen($hash) != 40) { setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true); return false; }
 		
-			$query = $this->mysqli->prepare("SELECT id, uid, expiredate, ip, agent FROM sessions WHERE hash = ?");
+			$query = $this->mysqli->prepare("SELECT id, uid, expiredate, ip, agent, cookie_crc FROM sessions WHERE hash = ?");
 			$query->bind_param("s", $hash);
-			$query->bind_result($sid, $uid, $expiredate, $db_ip, $db_agent);
+			$query->bind_result($sid, $uid, $expiredate, $db_ip, $db_agent, $db_cookie);
 			$query->execute();
 			$query->store_result();
 			$count = $query->num_rows;
@@ -563,7 +565,7 @@ class Auth
 			
 			if($count == 0)
 			{		
-				setcookie("auth_session", $hash, time() - 3600);
+				setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true);
 				
 				$this->addNewLog($uid, "CHECKSESSION_FAIL_NOEXIST", "Hash ({$hash}) doesn't exist in DB -> Cookie deleted");
 				
@@ -578,7 +580,7 @@ class Auth
 					{
 						$this->deleteExistingSessions($uid);
 					
-						setcookie("auth_session", $hash, time() - 3600);
+						setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true);
 					
 						$this->addNewLog($uid, "CHECKSESSION_FAIL_DIFF", "IP and User Agent Different ( DB : {$db_ip} / Current : " . $ip . " ) -> UID sessions deleted, cookie deleted");
 					
@@ -593,7 +595,7 @@ class Auth
 						{			
 							$this->deleteExistingSessions($uid);
 						
-							setcookie("auth_session", $hash, time() - 3600);
+							setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true);
 						
 							$this->addNewLog($uid, "CHECKSESSION_FAIL_EXPIRE", "Session expired ( Expire date : {$db_expiredate} ) -> UID sessions deleted, cookie deleted");
 						
@@ -616,7 +618,7 @@ class Auth
 					{			
 						$this->deleteExistingSessions($uid);
 						
-						setcookie("auth_session", $hash, time() - 3600);
+						setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true);
 						
 						$this->addNewLog($uid, "AUTH_CHECKSESSION_FAIL_EXPIRE", "Session expired ( Expire date : {$db_expiredate} ) -> UID sessions deleted, cookie deleted");
 						
@@ -624,7 +626,16 @@ class Auth
 					}
 					else 
 					{			
-						return true;
+						//cookie validation						
+						$cookie_crc = sha1 ($hash.SITEKEY.$expiredate);
+						if (!empty($cookie_crc) && ($db_cookie == $cookie_crc) 
+						{ 
+							return true;
+						} else {
+							$this->addNewLog($uid, "AUTH_COOKIE_FAIL_BADCRC", "Cookie Integrity failed");
+							
+							return false;
+						}
 					}
 				}
 			}
