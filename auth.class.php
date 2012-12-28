@@ -338,7 +338,7 @@ class Auth
 		
 		$this->deleteSession($hash);
 		
-		setcookie("auth_session", $hash, time() - 3600);
+		setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true);
 		
 		return true;
 	}
@@ -550,7 +550,7 @@ class Auth
 		}
 		else
 		{
-			if(strlen($hash) != 40) { setcookie("auth_session", $hash, time() - 3600); return false; }
+			if(strlen($hash) != 40) { setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true); return false; }
 		
 			$query = $this->mysqli->prepare("SELECT id, uid, expiredate, ip, agent FROM sessions WHERE hash = ?");
 			$query->bind_param("s", $hash);
@@ -563,7 +563,7 @@ class Auth
 			
 			if($count == 0)
 			{		
-				setcookie("auth_session", $hash, time() - 3600);
+				setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true);
 				
 				$this->addNewLog($uid, "CHECKSESSION_FAIL_NOEXIST", "Hash ({$hash}) doesn't exist in DB -> Cookie deleted");
 				
@@ -578,7 +578,7 @@ class Auth
 					{
 						$this->deleteExistingSessions($uid);
 					
-						setcookie("auth_session", $hash, time() - 3600);
+						setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true);
 					
 						$this->addNewLog($uid, "CHECKSESSION_FAIL_DIFF", "IP and User Agent Different ( DB : {$db_ip} / Current : " . $ip . " ) -> UID sessions deleted, cookie deleted");
 					
@@ -593,7 +593,7 @@ class Auth
 						{			
 							$this->deleteExistingSessions($uid);
 						
-							setcookie("auth_session", $hash, time() - 3600);
+							setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true);
 						
 							$this->addNewLog($uid, "CHECKSESSION_FAIL_EXPIRE", "Session expired ( Expire date : {$db_expiredate} ) -> UID sessions deleted, cookie deleted");
 						
@@ -616,7 +616,7 @@ class Auth
 					{			
 						$this->deleteExistingSessions($uid);
 						
-						setcookie("auth_session", $hash, time() - 3600);
+						setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true);
 						
 						$this->addNewLog($uid, "AUTH_CHECKSESSION_FAIL_EXPIRE", "Session expired ( Expire date : {$db_expiredate} ) -> UID sessions deleted, cookie deleted");
 						
