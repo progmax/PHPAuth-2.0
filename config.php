@@ -27,6 +27,11 @@ $auth_conf['salt_1'] = 'us_1dUDN4N-53/dkf7Sd?vbc_due1d?df!feg';
 $auth_conf['salt_2'] = 'Yu23ds09*d?u8SDv6sd?usi$_YSdsa24fd+83';
 // Password salt 3 : Change this to any random string
 $auth_conf['salt_3'] = '63fds.dfhsAdyISs_?&jdUsydbv92bf54ggvc';
+// Cookie
+$cookiedomain = ($_SERVER['HTTP_HOST'] != 'localhost') ? $_SERVER['HTTP_HOST'] : false;
+define( 'COOKIE_DOMAIN', $cookiedomain );
+define( 'COOKIE_PATH', '/' );
+define( 'COOKIE_AUTH', 'auth_session' );
 
 // ------------------------
 // Auth Email Configuration :
