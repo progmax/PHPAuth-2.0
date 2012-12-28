@@ -628,7 +628,7 @@ class Auth
 					{			
 						//cookie validation						
 						$cookie_crc = sha1 ($hash.SITEKEY.$expiredate);
-						if (!empty($cookie_crc) && ($db_cookie == $cookie_crc) 
+						if ($db_cookie == $cookie_crc) 
 						{ 
 							return true;
 						} else {
