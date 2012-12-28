@@ -27,14 +27,8 @@ class Auth
 	{
 		$return = array();
 		
-    		$ip = $_SERVER['REMOTE_ADDR'];
+    		$ip = $this->getIp();
  
-   		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        		$ip = $_SERVER['HTTP_CLIENT_IP'];
-   		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    		}		
-		
 		if($this->isBlocked($ip))
 		{
 			$return['code'] = 0;
@@ -115,13 +109,7 @@ class Auth
 	{
 		$return = array();
 		
-    		$ip = $_SERVER['REMOTE_ADDR'];
- 
-    		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        		$ip = $_SERVER['HTTP_CLIENT_IP'];
-    		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    		}		
+    		$ip = $this->getIp();
 		
 		if($this->isBlocked($ip))
 		{
@@ -188,13 +176,7 @@ class Auth
 	{
 		$return = array();
 		
-		$ip = $_SERVER['REMOTE_ADDR'];
-			 
-		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-			$ip = $_SERVER['HTTP_CLIENT_IP']	
-		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-		}		
+		$ip = $this->getIp();		
 		
 		if($this->isBlocked($ip))
 		{
@@ -286,13 +268,7 @@ class Auth
 	{
 		$return = array();
 		
-		$ip = $_SERVER['REMOTE_ADDR'];
-		
-		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-			$ip = $_SERVER['HTTP_CLIENT_IP'];
-		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-		}		
+		$ip = $this->getIp()
 		
 		if($this->isBlocked($ip))
 		{
@@ -434,12 +410,7 @@ class Auth
 		
 		$this->deleteExistingSessions($uid);
 		
-		$ip = $_SERVER['REMOTE_ADDR'];
-                if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        		$ip = $_SERVER['HTTP_CLIENT_IP'];
-    		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    		}
+		$ip = $this->getIp();
     		
 		$data['expire'] = date("Y-m-d H:i:s", strtotime("+1 month"));
 		
@@ -544,14 +515,8 @@ class Auth
 		else
 		{
     			
-    			$ip = $_SERVER['REMOTE_ADDR'];
- 
-    			if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        			$ip = $_SERVER['HTTP_CLIENT_IP'];
-    			} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    			}
-		
+    			$ip = $this->getIp();
+ 		
 			$query = $this->mysqli->prepare("INSERT INTO log (username, action, info, ip) VALUES (?, ?, ?, ?)");
 			$query->bind_param("ssss", $uid, $action, $info, $ip);
 			$query->execute();
@@ -570,12 +535,7 @@ class Auth
 	public function checkSession($hash)
 	{
 
-		$ip = $_SERVER['REMOTE_ADDR'];
- 	    	if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-	        	$ip = $_SERVER['HTTP_CLIENT_IP'];
-	    	} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-	        	$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-	   	}
+		$ip = $this->getIp();
 			   	
 		if($this->isBlocked($ip))
 		{
@@ -613,7 +573,7 @@ class Auth
 					
 						setcookie("auth_session", $hash, time() - 3600);
 					
-						$this->addNewLog($uid, "CHECKSESSION_FAIL_DIFF", "IP and User Agent Different ( DB : {$db_ip} / Current : " . $_SERVER['REMOTE_ADDR'] . " ) -> UID sessions deleted, cookie deleted");
+						$this->addNewLog($uid, "CHECKSESSION_FAIL_DIFF", "IP and User Agent Different ( DB : {$db_ip} / Current : " . $ip . " ) -> UID sessions deleted, cookie deleted");
 					
 						return false;
 					}
@@ -912,8 +872,7 @@ class Auth
 			else
 			{
 				$this->deleteUserResets($uid);
-			}
-			
+			}r
 			$expiredate = date("Y-m-d H:i:s", strtotime("+1 day"));
 			
 			$query = $this->mysqli->prepare("INSERT INTO resets (uid, resetkey, expiredate) VALUES (?, ?, ?)");
@@ -955,14 +914,8 @@ class Auth
 	{
 		$return = array();
 		
-		$ip = $_SERVER['REMOTE_ADDR'];
+		$ip = this->getIp();
  
-    		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        		$ip = $_SERVER['HTTP_CLIENT_IP'];
-    		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-   		}
-		
 		if($this->isBlocked($ip))
 		{
 			$return['code'] = 0;
@@ -1026,13 +979,7 @@ class Auth
 	{
 		$return = array();
 		
-     		$ip = $_SERVER['REMOTE_ADDR'];
- 
-    		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        		$ip = $_SERVER['HTTP_CLIENT_IP'];
-    		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    		}		
+     		$ip = $this->getIp();		
 		
 		if($this->isBlocked($ip))
 		{
@@ -1118,13 +1065,7 @@ class Auth
 	{
 		$return = array();
 		
-    		$ip = $_SERVER['REMOTE_ADDR'];
- 
-    		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-       			 $ip = $_SERVER['HTTP_CLIENT_IP'];
-    		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-       			 $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-	    	}		
+    		$ip = $this->getIp();		
 		
 		if($this->isBlocked($ip))
 		{
@@ -1235,13 +1176,7 @@ class Auth
 	{
 		$return = array();
 		
-    		$ip = $_SERVER['REMOTE_ADDR'];
- 
-    		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        		$ip = $_SERVER['HTTP_CLIENT_IP'];
-    		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    		}		
+    		$ip = $this->getIp();
 	
 		if($this->isBlocked($ip))
 		{
@@ -1354,14 +1289,7 @@ class Auth
 	{
 		$return = array();
 		
-    		$ip = $_SERVER['REMOTE_ADDR'];
- 
-    		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-			$ip = $_SERVER['HTTP_CLIENT_IP'];
-    		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    		}		
-		
+    		$ip = this->getIp();		
 		
 		if($this->isBlocked($ip))
 		{
@@ -1574,6 +1502,24 @@ class Auth
 		
 		return $key;
 	}
+	
+	/*
+	* Returns ip address
+	* @return string $io
+	*/
+	
+	private function getIp()
+	{
+    		$ip = $_SERVER['REMOTE_ADDR'];
+ 
+    		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+			$ip = $_SERVER['HTTP_CLIENT_IP'];
+    		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    		}
+		
+		return $ip;
+	}	
 }
 
 ?>
