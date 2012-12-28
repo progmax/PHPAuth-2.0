@@ -334,7 +334,7 @@ class Auth
 	
 	public function logout($hash)
 	{
-		if(strlen($hash) != 32) { return false; }
+		if(strlen($hash) != 40) { return false; }
 		
 		$this->deleteSession($hash);
 		
@@ -404,7 +404,7 @@ class Auth
 	{
 		$data = array();
 	
-		$data['hash'] = md5(microtime());
+		$data['hash'] = sha1(microtime());
 		
 		$agent = $_SERVER['HTTP_USER_AGENT'];
 		
@@ -543,7 +543,7 @@ class Auth
 		}
 		else
 		{
-			if(strlen($hash) != 32) { setcookie("auth_session", $hash, time() - 3600); return false; }
+			if(strlen($hash) != 40) { setcookie("auth_session", $hash, time() - 3600); return false; }
 		
 			$query = $this->mysqli->prepare("SELECT id, uid, expiredate, ip, agent FROM sessions WHERE hash = ?");
 			$query->bind_param("s", $hash);
@@ -1141,7 +1141,7 @@ class Auth
 	
 	public function sessionUID($hash)
 	{
-		if(strlen($hash) != 32) { return false; }
+		if(strlen($hash) != 40) { return false; }
 		else
 		{
 			$query = $this->mysqli->prepare("SELECT uid FROM sessions WHERE hash = ?");
