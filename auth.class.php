@@ -412,7 +412,7 @@ class Auth
 		$query->fetch();
 		$query->close();
 		$data['hash'] = sha1($data['salt'].microtime());
-		
+			
 		$agent = $_SERVER['HTTP_USER_AGENT'];
 		
 		$this->deleteExistingSessions($uid);
@@ -420,9 +420,11 @@ class Auth
 		$ip = $this->getIp();
     		
 		$data['expire'] = date("Y-m-d H:i:s", strtotime("+1 month"));
+		$data['cookie_crc'] = sha1 ($data['hash'].SITEKEY.$data['expire']);
 		
-		$query = $this->mysqli->prepare("INSERT INTO sessions (uid, hash, expiredate, ip, agent) VALUES (?, ?, ?, ?, ?)");
-		$query->bind_param("issss", $uid, $data['hash'], $data['expire'], $ip, $agent);
+		
+		$query = $this->mysqli->prepare("INSERT INTO sessions (uid, hash, expiredate, ip, agent, cookie_crc) VALUES (?, ?, ?, ?, ?, ?)");
+		$query->bind_param("isssss", $uid, $data['hash'], $data['expire'], $ip, $agent, $data['cookie_crc']);
 		$query->execute();
 		$query->close();
 		
@@ -552,9 +554,9 @@ class Auth
 		{
 			if(strlen($hash) != 40) { setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true); return false; }
 		
-			$query = $this->mysqli->prepare("SELECT id, uid, expiredate, ip, agent FROM sessions WHERE hash = ?");
+			$query = $this->mysqli->prepare("SELECT id, uid, expiredate, ip, agent, cookie_crc FROM sessions WHERE hash = ?");
 			$query->bind_param("s", $hash);
-			$query->bind_result($sid, $uid, $expiredate, $db_ip, $db_agent);
+			$query->bind_result($sid, $uid, $expiredate, $db_ip, $db_agent, $db_cookie);
 			$query->execute();
 			$query->store_result();
 			$count = $query->num_rows;
@@ -624,7 +626,13 @@ class Auth
 					}
 					else 
 					{			
-						return true;
+						$cookie_crc = sha1 ($hash.SITEKEY.$expiredate);
+						if (!empty($cookie_crc) && ($db_cookie == $cookie_crc) 
+						{ 
+							return true;
+						} else {
+							return false;
+						}
 					}
 				}
 			}
