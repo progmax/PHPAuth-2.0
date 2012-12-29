@@ -19,7 +19,7 @@ class Auth
 	/*
 	* Logs a user in
 	* @param string $username
-	* @param string $password (Must be already twice hashed with SHA1 : Ideally client side with JS)
+	* @param string $password (MUST be already twice hashed with SHA1 : Ideally client side with JS)
 	* @return array $return
 	*/
 	
@@ -27,7 +27,7 @@ class Auth
 	{
 		$return = array();
 		
-    		$ip = $this->getIp();
+    	$ip = $this->getIp();
  
 		if($this->isBlocked($ip))
 		{
@@ -101,7 +101,7 @@ class Auth
 	* Creates a new user, adds them to database
 	* @param string $email
 	* @param string $username
-	* @param string $password (Must be already twice hashed with SHA1 : Ideally client side with JS)
+	* @param string $password (MUST be already twice hashed with SHA1 : Ideally client side with JS)
 	* @return array $return
 	*/
 	
@@ -109,7 +109,7 @@ class Auth
 	{
 		$return = array();
 		
-    		$ip = $this->getIp();
+    	$ip = $this->getIp();
 		
 		if($this->isBlocked($ip))
 		{
@@ -334,11 +334,13 @@ class Auth
 	
 	public function logout($hash)
 	{
+		include("config.php");
+	
 		if(strlen($hash) != 40) { return false; }
 		
 		$this->deleteSession($hash);
 		
-		setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true);
+		setcookie($auth_conf['cookie_auth'], $hash, time() - 3600, $auth_conf['cookie_path'], $auth_conf['cookie_domain'], false, true);
 		
 		return true;
 	}
@@ -353,13 +355,15 @@ class Auth
 	{
 		include("config.php");
 	
-		// If you can use the following line :
-		if (strnatcmp(phpversion(),'5.5.0') >= 0) {
+		if (strnatcmp(phpversion(),'5.5.0') >= 0) 
+		{
 			$enc = hash_pbkdf2("SHA512", base64_encode(str_rot13(hash("SHA512", str_rot13($auth_conf['salt_1'] . $string . $auth_conf['salt_2'])))), $auth_conf['salt_3'], 50000, 128);
-		} else {
-			// If the above line spits out errors, use the following line :
+		} 
+		else 
+		{
 			$enc = hash("SHA512", base64_encode(str_rot13(hash("SHA512", str_rot13($auth_conf['salt_1'] . $string . $auth_conf['salt_2'])))));
 		}
+		
 		return $enc;
 	}
 	
@@ -402,6 +406,8 @@ class Auth
 	
 	private function addNewSession($uid)
 	{
+		include("config.php");
+	
 		$data = array();
 	
 		$query = $this->mysqli->prepare("SELECT salt FROM users WHERE id = ?");
@@ -420,7 +426,7 @@ class Auth
 		$ip = $this->getIp();
     		
 		$data['expire'] = date("Y-m-d H:i:s", strtotime("+1 month"));
-		$data['cookie_crc'] = sha1 ($data['hash'].SITEKEY.$data['expire']);
+		$data['cookie_crc'] = sha1 ($data['hash'].$auth_conf['cookie_auth'].$data['expire']);
 		
 		
 		$query = $this->mysqli->prepare("INSERT INTO sessions (uid, hash, expiredate, ip, agent, cookie_crc) VALUES (?, ?, ?, ?, ?, ?)");
@@ -522,9 +528,8 @@ class Auth
 		elseif(strlen($info) == 0) { return false; }
 		elseif(strlen($info) > 1000) { return false; }
 		else
-		{
-    			
-    			$ip = $this->getIp();
+		{	
+    		$ip = $this->getIp();
  		
 			$query = $this->mysqli->prepare("INSERT INTO log (username, action, info, ip) VALUES (?, ?, ?, ?)");
 			$query->bind_param("ssss", $uid, $action, $info, $ip);
@@ -543,6 +548,7 @@ class Auth
 	
 	public function checkSession($hash)
 	{
+		include("config.php");
 
 		$ip = $this->getIp();
 			   	
@@ -552,7 +558,7 @@ class Auth
 		}
 		else
 		{
-			if(strlen($hash) != 40) { setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true); return false; }
+			if(strlen($hash) != 40) { setcookie($auth_conf['cookie_auth'], $hash, time() - 3600, $auth_conf['cookie_path'], $auth_conf['cookie_domain'], false, true); return false; }
 		
 			$query = $this->mysqli->prepare("SELECT id, uid, expiredate, ip, agent, cookie_crc FROM sessions WHERE hash = ?");
 			$query->bind_param("s", $hash);
@@ -565,7 +571,7 @@ class Auth
 			
 			if($count == 0)
 			{		
-				setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true);
+				setcookie($auth_conf['cookie_auth'], $hash, time() - 3600, $auth_conf['cookie_path'], $auth_conf['cookie_domain'], false, true);
 				
 				$this->addNewLog($uid, "CHECKSESSION_FAIL_NOEXIST", "Hash ({$hash}) doesn't exist in DB -> Cookie deleted");
 				
@@ -580,7 +586,7 @@ class Auth
 					{
 						$this->deleteExistingSessions($uid);
 					
-						setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true);
+						setcookie($auth_conf['cookie_auth'], $hash, time() - 3600, $auth_conf['cookie_path'], $auth_conf['cookie_domain'], false, true);
 					
 						$this->addNewLog($uid, "CHECKSESSION_FAIL_DIFF", "IP and User Agent Different ( DB : {$db_ip} / Current : " . $ip . " ) -> UID sessions deleted, cookie deleted");
 					
@@ -595,7 +601,7 @@ class Auth
 						{			
 							$this->deleteExistingSessions($uid);
 						
-							setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true);
+							setcookie($auth_conf['cookie_auth'], $hash, time() - 3600, $auth_conf['cookie_path'], $auth_conf['cookie_domain'], false, true);
 						
 							$this->addNewLog($uid, "CHECKSESSION_FAIL_EXPIRE", "Session expired ( Expire date : {$db_expiredate} ) -> UID sessions deleted, cookie deleted");
 						
@@ -618,20 +624,22 @@ class Auth
 					{			
 						$this->deleteExistingSessions($uid);
 						
-						setcookie(COOKIE_AUTH, $hash, time() - 3600, COOKIE_PATH, COOKIE_DOMAIN, false, true);
+						setcookie($auth_conf['cookie_auth'], $hash, time() - 3600, $auth_conf['cookie_path'], $auth_conf['cookie_domain'], false, true);
 						
 						$this->addNewLog($uid, "AUTH_CHECKSESSION_FAIL_EXPIRE", "Session expired ( Expire date : {$db_expiredate} ) -> UID sessions deleted, cookie deleted");
 						
 						return false;
 					}
 					else 
-					{			
-						//cookie validation						
-						$cookie_crc = sha1 ($hash.SITEKEY.$expiredate);
+					{							
+						$cookie_crc = sha1 ($hash . $auth_conf['cookie_auth'] . $expiredate);
+						
 						if ($db_cookie == $cookie_crc) 
 						{ 
 							return true;
-						} else {
+						} 
+						else 
+						{
 							$this->addNewLog($uid, "AUTH_COOKIE_FAIL_BADCRC", "Cookie Integrity failed");
 							
 							return false;
@@ -1525,21 +1533,51 @@ class Auth
 	
 	/*
 	* Returns ip address
-	* @return string $io
+	* @return string $ip
 	*/
 	
 	private function getIp()
 	{
-    		$ip = $_SERVER['REMOTE_ADDR'];
+    	$ip = $_SERVER['REMOTE_ADDR'];
  
-    		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+		if (!empty($_SERVER['HTTP_CLIENT_IP'])) 
+		{
 			$ip = $_SERVER['HTTP_CLIENT_IP'];
-    		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    		}
+    	} 
+		elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) 
+		{
+        	$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    	}
 		
 		return $ip;
-	}	
+	}
+	
+	/*
+	* Gets a user's level by UID
+	* @param int $uid
+	* @return integer $level
+	*/
+
+	public function getLevel($uid)
+	{
+		$query = $this->mysqli->prepare("SELECT level FROM users WHERE id = ?");
+		$query->bind_param("i", $uid);
+		$query->bind_result($level);
+		$query->execute();
+		$query->store_result();
+		$count = $query->num_rows;
+		$query->fetch();
+		$query->close();
+
+		if($count == 0)
+		{
+			return false;
+		}
+		else
+		{
+			return $level;
+		}
+	}
 }
 
 ?>

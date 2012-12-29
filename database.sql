@@ -1,13 +1,5 @@
--- PHPAuth 2.0 SQL Structure Dump
-
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
 
 --
 -- Database: `phpauth2.0`
@@ -21,7 +13,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE IF NOT EXISTS `activations` (
   `uid` int(11) NOT NULL,
-  `activekey` varchar(20) CHARACTER SET utf8_bin NOT NULL,
+  `activekey` varchar(20) COLLATE utf8_bin NOT NULL,
   `expiredate` datetime NOT NULL,
   KEY `activekey` (`activekey`),
   KEY `uid` (`uid`)
@@ -34,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `activations` (
 --
 
 CREATE TABLE IF NOT EXISTS `attempts` (
-  `ip` varchar(15) CHARACTER SET utf8_bin NOT NULL,
+  `ip` varchar(15) COLLATE utf8_bin NOT NULL,
   `count` int(11) NOT NULL,
   `expiredate` datetime NOT NULL,
   KEY `ip` (`ip`)
@@ -48,10 +40,10 @@ CREATE TABLE IF NOT EXISTS `attempts` (
 
 CREATE TABLE IF NOT EXISTS `log` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `username` varchar(30) CHARACTER SET urf8_bin NOT NULL DEFAULT 'UNKNOWN' COMMENT 'Username or UID',
-  `action` varchar(100) CHARACTER SET utf8_bin NOT NULL,
-  `info` varchar(1000) CHARACTER SET utf8_bin NOT NULL DEFAULT 'None provided',
-  `ip` varchar(15) CHARACTER SET utf8_bin NOT NULL DEFAULT '0.0.0.0',
+  `username` varchar(30) COLLATE utf8_bin NOT NULL DEFAULT 'UNKNOWN' COMMENT 'Username or UID',
+  `action` varchar(100) COLLATE utf8_bin NOT NULL,
+  `info` varchar(1000) COLLATE utf8_bin NOT NULL DEFAULT 'None provided',
+  `ip` varchar(15) COLLATE utf8_bin NOT NULL DEFAULT '0.0.0.0',
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
@@ -64,7 +56,7 @@ CREATE TABLE IF NOT EXISTS `log` (
 
 CREATE TABLE IF NOT EXISTS `resets` (
   `uid` int(11) NOT NULL,
-  `resetkey` varchar(20) CHARACTER SET utf8_bin NOT NULL,
+  `resetkey` varchar(20) COLLATE utf8_bin NOT NULL,
   `expiredate` datetime NOT NULL,
   KEY `uid` (`uid`),
   KEY `resetkey` (`resetkey`)
@@ -79,11 +71,11 @@ CREATE TABLE IF NOT EXISTS `resets` (
 CREATE TABLE IF NOT EXISTS `sessions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `uid` int(11) NOT NULL,
-  `hash` varchar(40) CHARACTER SET utf8_bin NOT NULL,
+  `hash` varchar(40) COLLATE utf8_bin NOT NULL,
   `expiredate` datetime NOT NULL,
-  `ip` varchar(15) CHARACTER SET utf8_bin NOT NULL,
-  `agent` varchar(200) CHARACTER SET utf8_bin NOT NULL,
-  `cookie_crc` varchar(40) CHARACTER SET utf8_bin NOT NULL,
+  `ip` varchar(15) COLLATE utf8_bin NOT NULL,
+  `agent` varchar(200) COLLATE utf8_bin NOT NULL,
+  `cookie_crc` varchar(40) COLLATE utf8_bin NOT NULL,
   PRIMARY KEY (`id`),
   KEY `hash` (`hash`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
@@ -96,16 +88,13 @@ CREATE TABLE IF NOT EXISTS `sessions` (
 
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `username` varchar(30) CHARACTER SET utf8_bin NOT NULL,
-  `password` varchar(128) CHARACTER SET utf8_bin NOT NULL,
-  `email` varchar(100) CHARACTER SET utf8_bin NOT NULL,
-  `salt` varchar(20) CHARACTER SET utf8_bin NOT NULL,
+  `username` varchar(30) COLLATE utf8_bin NOT NULL,
+  `password` varchar(128) COLLATE utf8_bin NOT NULL,
+  `email` varchar(100) COLLATE utf8_bin NOT NULL,
+  `salt` varchar(20) COLLATE utf8_bin NOT NULL,
   `isactive` tinyint(1) NOT NULL DEFAULT '0',
+  `level` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `email` (`email`),
   KEY `username` (`username`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
