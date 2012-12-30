@@ -268,7 +268,7 @@ class Auth
     {
         $return = array();
         
-        $ip = $this->getIp()
+        $ip = $this->getIp();
         
         if($this->isBlocked($ip))
         {
@@ -899,7 +899,7 @@ class Auth
             else
             {
                 $this->deleteUserResets($uid);
-            }r
+            }
             $expiredate = date("Y-m-d H:i:s", strtotime("+1 day"));
             
             $query = $this->mysqli->prepare("INSERT INTO resets (uid, resetkey, expiredate) VALUES (?, ?, ?)");
@@ -941,7 +941,7 @@ class Auth
     {
         $return = array();
         
-        $ip = this->getIp();
+        $ip = $this->getIp();
  
         if($this->isBlocked($ip))
         {
@@ -1316,7 +1316,7 @@ class Auth
     {
         $return = array();
         
-            $ip = this->getIp();        
+        $ip = $this->getIp();        
         
         if($this->isBlocked($ip))
         {
@@ -1554,7 +1554,7 @@ class Auth
     /*
     * Gets a user's level by UID
     * @param int $uid
-    * @return integer $level
+    * @return int $level
     */
 
     public function getLevel($uid)
@@ -1580,25 +1580,39 @@ class Auth
     
     /*
     * Puts a user's level by UID
+    * @param string $hash
     * @param int $uid
-    * @return integer $level
+    * @param int $uid
+    * @return boolean
     */
 
-    public function putLevel($uid, $level)
+    public function putLevel($hash, $uid, $level)
     {
-        $query = $this->mysqli->prepare("UPDATE users SET level = ? WHERE id = ?");
-        $query->bind_param("ii", $level, $uid);
-        $query->bind_result($level);
-        $query->execute();
-        $query->close();
-
-        if($query->affected_rows == 0)
+        include("config.php");
+    
+        $admin_uid = $this->sessionUID($hash);
+        $admin_level = $this->getLevel($admin_uid);
+        
+        if ($admin_level >= $auth_conf['admin_level'])
         {
             return false;
         }
         else
         {
-            return $level;
+            $query = $this->mysqli->prepare("UPDATE users SET level = ? WHERE id = ?");
+            $query->bind_param("ii", $level, $uid);
+            $query->execute();
+            $count = $query->affected_rows;
+            $query->close();
+            
+            if($count == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
     }    
     
@@ -1627,7 +1641,45 @@ class Auth
         {
             return $lang;    
         }
-    }    
+    }
+
+    /*
+    * Puts a user's language based on session hash
+    * @param string $hash
+    * @param string $lang
+    * @return string $language
+    */
+
+    public function putLang($hash, $lang)
+    {
+        $query = $this->mysqli->prepare("UPDATE sessions SET lang = ? WHERE hash = ?");
+        $query->bind_param("ss", $lang, $hash);
+        $query->execute();
+        $query->close();
+    
+        if($count == 0)
+        {
+            return false;
+        }
+        else
+        {
+            $uid = $this->sessionUID($hash);
+            $query = $this->mysqli->prepare("UPDATE users SET lang = ? WHERE id = ?");
+            $query->bind_param("si", $lang, $uid);
+            $query->execute();
+            $count = $query->affected_rows;
+            $query->close();
+    
+            if($count == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+    }
 }
 
 ?>

@@ -7,10 +7,10 @@ $auth_conf = array();
 // MySQL Configuration :
 // ------------------------
 
-$db['host'] = "********";
-$db['user'] = "********";
-$db['pass'] = "********";
-$db['name'] = "********";
+$db['host'] = "*******";
+$db['user'] = "*******";
+$db['pass'] = "*******";
+$db['name'] = "*******";
 
 // ------------------------
 // Auth Configuration :
@@ -19,7 +19,7 @@ $db['name'] = "********";
 // Language of activation / password reset emails : Currently either "en" / "es" / "fr"
 $auth_conf['lang'] = "en";
 // Base url of site PHPAuth 2.0 is hosted on, including trailing slash
-$auth_conf['base_url'] = "http://phpauth.cuonic.com/2.0/demo/";
+$auth_conf['base_url'] = "http://example.com/phpauth2.0/";
 
 // Password salt 1 : Change this to any random string
 $auth_conf['salt_1'] = 'us_1dUDN4N-53/dkf7Sd?vbc_due1d?df!feg';
@@ -34,6 +34,10 @@ $auth_conf['cookie_domain'] = ($_SERVER['HTTP_HOST'] != 'localhost') ? $_SERVER[
 $auth_conf['cookie_path'] = '/';
 $auth_conf['cookie_auth'] = 'auth_session';
 $auth_conf['sitekey'] = 'dk;l189654è(tyhj§!dfgdfàzgq_f4fá.';
+
+// Administration configuration
+
+$auth_conf['admin_level'] = 99;
 
 // ------------------------
 // Auth Email Configuration :
