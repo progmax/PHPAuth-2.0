@@ -190,9 +190,9 @@ class Auth
             {
                 $query = $this->dbh->prepare("SELECT uid, expiredate FROM activations WHERE activekey = ?");
                 $query->execute(array($activekey));
-                $count = count($query->fetchAll());
+                $row = $query->fetch(PDO::FETCH_ASSOC);
 
-                if($count == 0)
+                if(count($row) == 0)
                 {
                     $this->addAttempt($ip);
 
@@ -203,9 +203,9 @@ class Auth
                 }
                 else
                 {
-                    if(!$this->isUserActivated($uid))
+                    if(!$this->isUserActivated($row['uid']))
                     {
-                        $expiredate = strtotime($expiredate);
+                        $expiredate = strtotime($row['$expiredate']);
                         $currentdate = strtotime(date("Y-m-d H:i:s"));
 
                         if($currentdate < $expiredate)
@@ -213,11 +213,11 @@ class Auth
                             $isactive = 1;
 
                             $query = $this->dbh->prepare("UPDATE users SET isactive = ? WHERE id = ?");
-                            $query->execute(array($isactive, $uid));
+                            $query->execute(array($isactive, $row['uid']));
 
-                            $this->deleteUserActivations($uid);
+                            $this->deleteUserActivations($row['uid']);
 
-                            $this->addNewLog($uid, "ACTIVATE_SUCCESS", "Account activated -> Isactive : 1");
+                            $this->addNewLog($row['uid'], "ACTIVATE_SUCCESS", "Account activated -> Isactive : 1");
 
                             $return['code'] = 5;
                             return $return;
@@ -226,9 +226,9 @@ class Auth
                         {
                             $this->addAttempt($ip);
 
-                            $this->addNewLog($uid, "ACTIVATE_FAIL_EXPIRED", "User attempted to activate account with key : {$activekey} -> Key expired");
+                            $this->addNewLog($row['uid'], "ACTIVATE_FAIL_EXPIRED", "User attempted to activate account with key : {$activekey} -> Key expired");
 
-                            $this->deleteUserActivations($uid);
+                            $this->deleteUserActivations($row['uid']);
 
                             $return['code'] = 4;
                             return $return;
@@ -238,9 +238,9 @@ class Auth
                     {
                         $this->addAttempt($ip);
 
-                        $this->deleteUserActivations($uid);
+                        $this->deleteUserActivations($row['uid']);
 
-                        $this->addNewLog($uid, "ACTIVATE_FAIL_ALREADYACTIVE", "User attempted to activate an account with the key : {$activekey} -> Account already active. Set activekey : 0");
+                        $this->addNewLog($row['uid'], "ACTIVATE_FAIL_ALREADYACTIVE", "User attempted to activate an account with the key : {$activekey} -> Account already active. Set activekey : 0");
 
                         $return['code'] = 3;
                         return $return;
@@ -277,9 +277,9 @@ class Auth
             {
                 $query = $this->dbh->prepare("SELECT id FROM users WHERE email = ?");
                 $query->execute(array($email));
-                $count = count($query->fetchAll());
+                $row = $query->fetch(PDO::FETCH_ASSOC);
 
-                if($count == 0)
+                if(count($row) == 0)
                 {
                     $this->addAttempt($ip);
 
@@ -290,9 +290,9 @@ class Auth
                 }
                 else
                 {
-                    if($this->addReset($uid, $email))
+                    if($this->addReset($row['id'], $email))
                     {
-                        $this->addNewLog($uid, "REQUESTRESET_SUCCESS", "A reset request was sent to the email : {$email}");
+                        $this->addNewLog($row['id'], "REQUESTRESET_SUCCESS", "A reset request was sent to the email : {$email}");
 
                         $return['code'] = 4;
                         $return['email'] = $email;
@@ -303,7 +303,7 @@ class Auth
                     {
                         $this->addAttempt($ip);
 
-                        $this->addNewLog($uid, "REQUESTRESET_FAIL_EXIST", "User attempted to reset the password for the email : {$email} -> A reset request already exists.");
+                        $this->addNewLog($row['id'], "REQUESTRESET_FAIL_EXIST", "User attempted to reset the password for the email : {$email} -> A reset request already exists.");
 
                         $return['code'] = 3;
                         return $return;
@@ -394,8 +394,6 @@ class Auth
     private function addNewSession($uid)
     {
         include("config.php");
-
-        $data = array();
 
         $query = $this->dbh->prepare("SELECT salt, lang FROM users WHERE id = ?");
         $query->execute(array($uid));
@@ -533,7 +531,7 @@ class Auth
             {
                 setcookie($auth_conf['cookie_auth'], $hash, time() - 3600, $auth_conf['cookie_path'], $auth_conf['cookie_domain'], false, true);
 
-                $this->addNewLog($uid, "CHECKSESSION_FAIL_NOEXIST", "Hash ({$hash}) doesn't exist in DB -> Cookie deleted");
+                $this->addNewLog($row['uid'], "CHECKSESSION_FAIL_NOEXIST", "Hash ({$hash}) doesn't exist in DB -> Cookie deleted");
 
                 return false;
             }
@@ -569,7 +567,7 @@ class Auth
 
                             setcookie($auth_conf['cookie_auth'], $hash, time() - 3600, $auth_conf['cookie_path'], $auth_conf['cookie_domain'], false, true);
 
-                            $this->addNewLog($uid, "CHECKSESSION_FAIL_EXPIRE", "Session expired ( Expire date : {$db_expiredate} ) -> UID sessions deleted, cookie deleted");
+                            $this->addNewLog($uid, "CHECKSESSION_FAIL_EXPIRE", "Session expired ( Expire date : {$row['expiredate']} ) -> UID sessions deleted, cookie deleted");
 
                             return false;
                         }
@@ -590,7 +588,7 @@ class Auth
 
                         setcookie($auth_conf['cookie_auth'], $hash, time() - 3600, $auth_conf['cookie_path'], $auth_conf['cookie_domain'], false, true);
 
-                        $this->addNewLog($uid, "AUTH_CHECKSESSION_FAIL_EXPIRE", "Session expired ( Expire date : {$db_expiredate} ) -> UID sessions deleted, cookie deleted");
+                        $this->addNewLog($uid, "AUTH_CHECKSESSION_FAIL_EXPIRE", "Session expired ( Expire date : {$row['expiredate']} ) -> UID sessions deleted, cookie deleted");
 
                         return false;
                     }
@@ -1055,7 +1053,7 @@ class Auth
                     {
                         if($this->addActivation($row['uid'], $email))
                         {
-                            $this->addNewLog($uid, "RESENDACTIVATION_SUCCESS", "Activation email was resent to the email : {$email}");
+                            $this->addNewLog($row['uid'], "RESENDACTIVATION_SUCCESS", "Activation email was resent to the email : {$email}");
 
                             $return['code'] = 5;
                             return $return;
