@@ -426,7 +426,7 @@ class Auth
         $ip = $this->getIp();
             
         $data['expire'] = date("Y-m-d H:i:s", strtotime("+1 month"));
-        $data['cookie_crc'] = sha1 ($data['hash'].$auth_conf['sitekey'].$data['expire']);
+        $data['cookie_crc'] = sha1 ($data['hash'].$auth_conf['sitekey']);
         
         
         $query = $this->mysqli->prepare("INSERT INTO sessions (uid, hash, expiredate, ip, agent, cookie_crc, lang) VALUES (?, ?, ?, ?, ?, ?, ?)");
@@ -632,7 +632,7 @@ class Auth
                     }
                     else 
                     {                            
-                        $cookie_crc = sha1 ($hash . $auth_conf['sitekey'] . $expiredate);
+                        $cookie_crc = sha1 ($hash.$auth_conf['sitekey']);
                         
                         if ($db_cookie == $cookie_crc) 
                         { 
