@@ -1,16 +1,6 @@
 <?php
 
-$db = array();
 $auth_conf = array();
-
-// ------------------------
-// MySQL Configuration :
-// ------------------------
-
-$db['host'] = "*******";
-$db['user'] = "*******";
-$db['pass'] = "*******";
-$db['name'] = "*******";
 
 // ------------------------
 // Auth Configuration :
@@ -43,7 +33,7 @@ $auth_conf['admin_level'] = 99;
 // Auth Email Configuration :
 // ------------------------
 
-switch ($auth_conf['lang']) 
+switch ($auth_conf['lang'])
 {
 	case "es":
 		// Registration activation email subject
@@ -73,9 +63,9 @@ switch ($auth_conf['lang'])
 		$auth_conf['reset_email']['head']  = 'From: PHPAuth 2.0 <no-reply@phpauth.cuonic.com>' . "\r\n";
 		$auth_conf['reset_email']['head'] .= 'MIME-Version: 1.0' . "\r\n";
 		$auth_conf['reset_email']['head'] .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-		
+
 		break;
-   
+
 	case "fr":
 		// Registration activation email subject
 		$auth_conf['activation_email']['subj'] = "PHPAuth 2.0 : Activation de compte";
@@ -104,9 +94,9 @@ switch ($auth_conf['lang'])
 		$auth_conf['reset_email']['head']  = 'From: PHPAuth 2.0 <no-reply@phpauth.cuonic.com>' . "\r\n";
 		$auth_conf['reset_email']['head'] .= 'MIME-Version: 1.0' . "\r\n";
 		$auth_conf['reset_email']['head'] .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-		
+
 		break;
-		
+
 	default:
 		// Registration activation email subject
 		$auth_conf['activation_email']['subj'] = "PHPAuth 2.0 : Account Activation required";
@@ -135,7 +125,7 @@ switch ($auth_conf['lang'])
 		$auth_conf['reset_email']['head']  = 'From: PHPAuth 2.0 <no-reply@phpauth.cuonic.com>' . "\r\n";
 		$auth_conf['reset_email']['head'] .= 'MIME-Version: 1.0' . "\r\n";
 		$auth_conf['reset_email']['head'] .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-		
+
 		break;
 }
 
