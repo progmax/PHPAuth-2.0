@@ -11,8 +11,6 @@ class Auth
 
     public function __construct()
     {
-        include("config.php");
-
         $this->dbh = $Auth::getConnection();
     }
 
@@ -23,6 +21,8 @@ class Auth
     
     public static function getConnection() 
     {
+        include("config.php");
+        
         if (!self::$db) {
             try {
                 // assign PDO object to db variable
