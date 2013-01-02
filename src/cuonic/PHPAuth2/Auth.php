@@ -1,4 +1,5 @@
 <?php
+namespace cuonic\PHPAuth2;
 
 class Auth
 {
@@ -8,7 +9,7 @@ class Auth
     * Initiates database connection
     */
 
-    public function __construct(PDO $dbh)
+    public function __construct(\PDO $dbh)
     {
         $this->dbh = $dbh;
     }
@@ -26,40 +27,50 @@ class Auth
 
         $ip = $this->getIp();
 
-        if($this->isBlocked($ip))
-        {
+        if ($this->isBlocked($ip)) {
             $return['code'] = 0;
             return $return;
-        }
-        else
-        {
-            if(strlen($username) == 0) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($username) > 30) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($username) < 3) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($password) == 0) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($password) != 40) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            else
-            {
+        } else {
+            if (strlen($username) == 0) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($username) > 30) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($username) < 3) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($password) == 0) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($password) != 40) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } else {
                 $plainpass = $password;
                 $password = $this->getHash($password);
 
-                if($userdata = $this->getUserData($username))
-                {
-                    if($password === $userdata['password'])
-                    {
-                        if($userdata['isactive'] == 1)
-                        {
+                if ($userdata = $this->getUserData($username)) {
+                    if ($password === $userdata['password']) {
+                        if ($userdata['isactive'] == 1) {
                             $sessiondata = $this->addNewSession($userdata['uid']);
 
                             $return['code'] = 4;
                             $return['session_hash'] = $sessiondata['hash'];
 
-                            $this->addNewLog($userdata['uid'], "LOGIN_SUCCESS", "User logged in. Session hash : " . $sessiondata['hash']);
+                            $this->addNewLog(
+                                $userdata['uid'],
+                                "LOGIN_SUCCESS",
+                                "User logged in. Session hash : " . $sessiondata['hash']
+                            );
 
                             return $return;
-                        }
-                        else
-                        {
+                        } else {
                             $this->addAttempt($ip);
 
                             $this->addNewLog($userdata['uid'], "LOGIN_FAIL_NONACTIVE", "Account inactive");
@@ -68,9 +79,7 @@ class Auth
 
                             return $return;
                         }
-                    }
-                    else
-                    {
+                    } else {
                         $this->addAttempt($ip);
 
                         $this->addNewLog($userdata['uid'], "LOGIN_FAIL_PASSWORD", "Password incorrect : {$plainpass}");
@@ -79,12 +88,14 @@ class Auth
 
                         return $return;
                     }
-                }
-                else
-                {
+                } else {
                     $this->addAttempt($ip);
 
-                    $this->addNewLog("", "LOGIN_FAIL_USERNAME", "Attempted login with the username : {$username} -> Username doesn't exist in DB");
+                    $this->addNewLog(
+                        "",
+                        "LOGIN_FAIL_USERNAME",
+                        "Attempted login with the username : {$username} -> Username doesn't exist in DB"
+                    );
 
                     $return['code'] = 2;
 
@@ -108,53 +119,79 @@ class Auth
 
         $ip = $this->getIp();
 
-        if($this->isBlocked($ip))
-        {
+        if ($this->isBlocked($ip)) {
             $return['code'] = 0;
             return $return;
-        }
-        else
-        {
-            if(strlen($email) == 0) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($email) > 100) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($email) < 3) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($username) == 0) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($username) > 30) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($username) < 3) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($password) != 40) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            else
-            {
+        } else {
+            if (strlen($email) == 0) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($email) > 100) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($email) < 3) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($username) == 0) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($username) > 30) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($username) < 3) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($password) != 40) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } else {
                 $password = $this->getHash($password);
 
-                if(!$this->isEmailTaken($email))
-                {
-                    if(!$this->isUsernameTaken($username))
-                    {
+                if (!$this->isEmailTaken($email)) {
+                    if (!$this->isUsernameTaken($username)) {
                         $uid = $this->addUser($email, $username, $password);
 
-                        $this->addNewLog($uid, "REGISTER_SUCCESS", "Account created successfully, activation email sent.");
+                        $this->addNewLog(
+                            $uid,
+                            "REGISTER_SUCCESS",
+                            "Account created successfully, activation email sent."
+                        );
 
                         $return['code'] = 4;
                         $return['email'] = $email;
                         return $return;
 
-                    }
-                    else
-                    {
+                    } else {
                         $this->addAttempt($ip);
 
-                        $this->addNewLog("", "REGISTER_FAIL_USERNAME", "User attempted to register new account with the username : {$username} -> Username already in use");
+                        $this->addNewLog(
+                            "",
+                            "REGISTER_FAIL_USERNAME",
+                            "User attempted to register new account with the username : {$username} -> Username already in use"
+                        );
 
                         $return['code'] = 3;
                         return $return;
                     }
-                }
-                else
-                {
+                } else {
                     $this->addAttempt($ip);
 
-                    $this->addNewLog("", "REGISTER_FAIL_EMAIL", "User attempted to register new account with the email : {$email} -> Email already in use");
+                    $this->addNewLog(
+                        "",
+                        "REGISTER_FAIL_EMAIL",
+                        "User attempted to register new account with the email : {$email} -> Email already in use"
+                    );
 
                     $return['code'] = 2;
                     return $return;
@@ -175,39 +212,40 @@ class Auth
 
         $ip = $this->getIp();
 
-        if($this->isBlocked($ip))
-        {
+        if ($this->isBlocked($ip)) {
             $return['code'] = 0;
             return $return;
-        }
-        else
-        {
-            if(strlen($activekey) > 20) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($activekey) < 20) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            else
-            {
+        } else {
+            if (strlen($activekey) > 20) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($activekey) < 20) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } else {
                 $query = $this->dbh->prepare("SELECT uid, expiredate FROM activations WHERE activekey = ?");
                 $query->execute(array($activekey));
-                $row = $query->fetch(PDO::FETCH_ASSOC);
+                $row = $query->fetch(\PDO::FETCH_ASSOC);
 
-                if(count($row) == 0)
-                {
+                if (count($row) == 0) {
                     $this->addAttempt($ip);
 
-                    $this->addNewLog("", "ACTIVATE_FAIL_ACTIVEKEY", "User attempted to activate an account with the key : {$activekey} -> Activekey not found in database");
+                    $this->addNewLog(
+                        "",
+                        "ACTIVATE_FAIL_ACTIVEKEY",
+                        "User attempted to activate an account with the key : {$activekey} -> Activekey not found in database"
+                    );
 
                     $return['code'] = 2;
                     return $return;
-                }
-                else
-                {
-                    if(!$this->isUserActivated($row['uid']))
-                    {
+                } else {
+                    if (!$this->isUserActivated($row['uid'])) {
                         $expiredate = strtotime($row['$expiredate']);
                         $currentdate = strtotime(date("Y-m-d H:i:s"));
 
-                        if($currentdate < $expiredate)
-                        {
+                        if ($currentdate < $expiredate) {
                             $isactive = 1;
 
                             $query = $this->dbh->prepare("UPDATE users SET isactive = ? WHERE id = ?");
@@ -219,26 +257,30 @@ class Auth
 
                             $return['code'] = 5;
                             return $return;
-                        }
-                        else
-                        {
+                        } else {
                             $this->addAttempt($ip);
 
-                            $this->addNewLog($row['uid'], "ACTIVATE_FAIL_EXPIRED", "User attempted to activate account with key : {$activekey} -> Key expired");
+                            $this->addNewLog(
+                                $row['uid'],
+                                "ACTIVATE_FAIL_EXPIRED",
+                                "User attempted to activate account with key : {$activekey} -> Key expired"
+                            );
 
                             $this->deleteUserActivations($row['uid']);
 
                             $return['code'] = 4;
                             return $return;
                         }
-                    }
-                    else
-                    {
+                    } else {
                         $this->addAttempt($ip);
 
                         $this->deleteUserActivations($row['uid']);
 
-                        $this->addNewLog($row['uid'], "ACTIVATE_FAIL_ALREADYACTIVE", "User attempted to activate an account with the key : {$activekey} -> Account already active. Set activekey : 0");
+                        $this->addNewLog(
+                            $row['uid'],
+                            "ACTIVATE_FAIL_ALREADYACTIVE",
+                            "User attempted to activate an account with the key : {$activekey} -> Account already active. Set activekey : 0"
+                        );
 
                         $return['code'] = 3;
                         return $return;
@@ -260,48 +302,62 @@ class Auth
 
         $ip = $this->getIp();
 
-        if($this->isBlocked($ip))
-        {
+        if ($this->isBlocked($ip)) {
             $return['code'] = 0;
             return $return;
-        }
-        else
-        {
-            if(strlen($email) == 0) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($email) > 100) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($email) < 3) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            else
-            {
+        } else {
+            if (strlen($email) == 0) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($email) > 100) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($email) < 3) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } else {
                 $query = $this->dbh->prepare("SELECT id FROM users WHERE email = ?");
                 $query->execute(array($email));
-                $row = $query->fetch(PDO::FETCH_ASSOC);
+                $row = $query->fetch(\PDO::FETCH_ASSOC);
 
-                if(count($row) == 0)
-                {
+                if (count($row) == 0) {
                     $this->addAttempt($ip);
 
-                    $this->addNewLog("", "REQUESTRESET_FAIL_EMAIL", "User attempted to reset the password for the email : {$email} -> Email doesn't exist in DB");
+                    $this->addNewLog(
+                        "",
+                        "REQUESTRESET_FAIL_EMAIL",
+                        "User attempted to reset the password for the email : {$email} -> Email doesn't exist in DB"
+                    );
 
                     $return['code'] = 2;
                     return $return;
-                }
-                else
-                {
-                    if($this->addReset($row['id'], $email))
-                    {
-                        $this->addNewLog($row['id'], "REQUESTRESET_SUCCESS", "A reset request was sent to the email : {$email}");
+                } else {
+                    if ($this->addReset($row['id'], $email)) {
+                        $this->addNewLog(
+                            $row['id'],
+                            "REQUESTRESET_SUCCESS",
+                            "A reset request was sent to the email : {$email}"
+                        );
 
                         $return['code'] = 4;
                         $return['email'] = $email;
 
                         return $return;
-                    }
-                    else
-                    {
+                    } else {
                         $this->addAttempt($ip);
 
-                        $this->addNewLog($row['id'], "REQUESTRESET_FAIL_EXIST", "User attempted to reset the password for the email : {$email} -> A reset request already exists.");
+                        $this->addNewLog(
+                            $row['id'],
+                            "REQUESTRESET_FAIL_EXIST",
+                            "User attempted to reset the password for the email : {$email} -> A reset request already exists."
+                        );
 
                         $return['code'] = 3;
                         return $return;
@@ -321,12 +377,22 @@ class Auth
     {
         include("config.php");
 
-        if(strlen($hash) != 40) { return false; }
+        if (strlen($hash) != 40) {
+            return false;
+        }
 
         $return = $this->deleteSession($hash);
 
         if ($return) {
-            setcookie($auth_conf['cookie_auth'], $hash, time() - 3600, $auth_conf['cookie_path'], $auth_conf['cookie_domain'], false, true);
+            setcookie(
+                $auth_conf['cookie_auth'],
+                $hash,
+                time() - 3600,
+                $auth_conf['cookie_path'],
+                $auth_conf['cookie_domain'],
+                false,
+                true
+            );
         }
 
         return $return;
@@ -342,13 +408,23 @@ class Auth
     {
         include("config.php");
 
-        if (strnatcmp(phpversion(),'5.5.0') >= 0)
-        {
-            $enc = hash_pbkdf2("SHA512", base64_encode(str_rot13(hash("SHA512", str_rot13($auth_conf['salt_1'] . $string . $auth_conf['salt_2'])))), $auth_conf['salt_3'], 50000, 128);
-        }
-        else
-        {
-            $enc = hash("SHA512", base64_encode(str_rot13(hash("SHA512", str_rot13($auth_conf['salt_1'] . $string . $auth_conf['salt_2'])))));
+        if (strnatcmp(phpversion(), '5.5.0') >= 0) {
+            $enc = hash_pbkdf2(
+                "SHA512",
+                base64_encode(
+                    str_rot13(hash("SHA512", str_rot13($auth_conf['salt_1'] . $string . $auth_conf['salt_2'])))
+                ),
+                $auth_conf['salt_3'],
+                50000,
+                128
+            );
+        } else {
+            $enc = hash(
+                "SHA512",
+                base64_encode(
+                    str_rot13(hash("SHA512", str_rot13($auth_conf['salt_1'] . $string . $auth_conf['salt_2'])))
+                )
+            );
         }
 
         return $enc;
@@ -368,17 +444,14 @@ class Auth
 
         $query = $this->dbh->prepare("SELECT id, password, email, salt, lang, isactive FROM users WHERE username = ?");
         $query->execute(array($username));
-        $data = $query->fetch(PDO::FETCH_ASSOC);
+        $data = $query->fetch(\PDO::FETCH_ASSOC);
 
         // Support previous convention
         $data['uid'] = $data['id'];
 
-        if(count($data) == 0)
-        {
+        if (count($data) == 0) {
             return false;
-        }
-        else
-        {
+        } else {
             return $data;
         }
     }
@@ -395,8 +468,8 @@ class Auth
 
         $query = $this->dbh->prepare("SELECT salt, lang FROM users WHERE id = ?");
         $query->execute(array($uid));
-        $data = $query->fetch(PDO::FETCH_ASSOC);
-        $data['hash'] = sha1($data['salt'].microtime());
+        $data = $query->fetch(\PDO::FETCH_ASSOC);
+        $data['hash'] = sha1($data['salt'] . microtime());
 
         $agent = $_SERVER['HTTP_USER_AGENT'];
 
@@ -405,10 +478,12 @@ class Auth
         $ip = $this->getIp();
 
         $data['expire'] = date("Y-m-d H:i:s", strtotime("+1 month"));
-        $data['cookie_crc'] = sha1 ($data['hash'].$auth_conf['sitekey']);
+        $data['cookie_crc'] = sha1($data['hash'] . $auth_conf['sitekey']);
 
 
-        $query = $this->dbh->prepare("INSERT INTO sessions (uid, hash, expiredate, ip, agent, cookie_crc, lang) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $query = $this->dbh->prepare(
+            "INSERT INTO sessions (uid, hash, expiredate, ip, agent, cookie_crc, lang) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        );
         $query->execute(array($uid, $data['hash'], $data['expire'], $ip, $agent, $data['cookie_crc'], $data['lang']));
 
         return $data;
@@ -452,24 +527,18 @@ class Auth
     {
         $query = $this->dbh->prepare("SELECT uid FROM sessions WHERE hash = ?");
         $query->execute(array($hash));
-        $row = $query->fetch(PDO::FETCH_ASSOC);
+        $row = $query->fetch(\PDO::FETCH_ASSOC);
 
-        if(count($row) == 0)
-        {
+        if (count($row) == 0) {
             return false;
-        }
-        else
-        {
+        } else {
             $query = $this->dbh->prepare("SELECT username FROM users WHERE id = ?");
             $query->execute(array($row['uid']));
-            $row = $query->fetch(PDO::FETCH_ASSOC);
+            $row = $query->fetch(\PDO::FETCH_ASSOC);
 
-            if(count($row) == 0)
-            {
+            if (count($row) == 0) {
                 return false;
-            }
-            else
-            {
+            } else {
                 return $row['username'];
             }
         }
@@ -485,13 +554,17 @@ class Auth
 
     private function addNewLog($uid = 'UNKNOWN', $action, $info)
     {
-        if(strlen($uid) == 0) { $uid = "UNKNOWN"; }
-        elseif(strlen($action) == 0) { return false; }
-        elseif(strlen($action) > 100) { return false; }
-        elseif(strlen($info) == 0) { return false; }
-        elseif(strlen($info) > 1000) { return false; }
-        else
-        {
+        if (strlen($uid) == 0) {
+            $uid = "UNKNOWN";
+        } elseif (strlen($action) == 0) {
+            return false;
+        } elseif (strlen($action) > 100) {
+            return false;
+        } elseif (strlen($info) == 0) {
+            return false;
+        } elseif (strlen($info) > 1000) {
+            return false;
+        } else {
             $ip = $this->getIp();
 
             $query = $this->dbh->prepare("INSERT INTO log (username, action, info, ip) VALUES (?, ?, ?, ?)");
@@ -513,28 +586,47 @@ class Auth
 
         $ip = $this->getIp();
 
-        if($this->isBlocked($ip))
-        {
+        if ($this->isBlocked($ip)) {
             return false;
-        }
-        else
-        {
-            if(strlen($hash) != 40) { setcookie($auth_conf['cookie_auth'], $hash, time() - 3600, $auth_conf['cookie_path'], $auth_conf['cookie_domain'], false, true); return false; }
-
-            $query = $this->dbh->prepare("SELECT id, uid, expiredate, ip, agent, cookie_crc FROM sessions WHERE hash = ?");
-            $query->execute(array($hash));
-            $row = $query->fetch(PDO::FETCH_ASSOC);
-
-            if (count($row) == 0)
-            {
-                setcookie($auth_conf['cookie_auth'], $hash, time() - 3600, $auth_conf['cookie_path'], $auth_conf['cookie_domain'], false, true);
-
-                $this->addNewLog($row['uid'], "CHECKSESSION_FAIL_NOEXIST", "Hash ({$hash}) doesn't exist in DB -> Cookie deleted");
-
+        } else {
+            if (strlen($hash) != 40) {
+                setcookie(
+                    $auth_conf['cookie_auth'],
+                    $hash,
+                    time() - 3600,
+                    $auth_conf['cookie_path'],
+                    $auth_conf['cookie_domain'],
+                    false,
+                    true
+                );
                 return false;
             }
-            else
-            {
+
+            $query = $this->dbh->prepare(
+                "SELECT id, uid, expiredate, ip, agent, cookie_crc FROM sessions WHERE hash = ?"
+            );
+            $query->execute(array($hash));
+            $row = $query->fetch(\PDO::FETCH_ASSOC);
+
+            if (count($row) == 0) {
+                setcookie(
+                    $auth_conf['cookie_auth'],
+                    $hash,
+                    time() - 3600,
+                    $auth_conf['cookie_path'],
+                    $auth_conf['cookie_domain'],
+                    false,
+                    true
+                );
+
+                $this->addNewLog(
+                    $row['uid'],
+                    "CHECKSESSION_FAIL_NOEXIST",
+                    "Hash ({$hash}) doesn't exist in DB -> Cookie deleted"
+                );
+
+                return false;
+            } else {
                 $sid = $row['id'];
                 $uid = $row['uid'];
                 $expiredate = $row['expiredate'];
@@ -542,64 +634,85 @@ class Auth
                 $db_agent = $row['agent'];
                 $db_cookie = $row['cookie_crc'];
 
-                if($ip != $db_ip)
-                {
-                    if($_SERVER['HTTP_USER_AGENT'] != $db_agent)
-                    {
+                if ($ip != $db_ip) {
+                    if ($_SERVER['HTTP_USER_AGENT'] != $db_agent) {
                         $this->deleteExistingSessions($uid);
 
-                        setcookie($auth_conf['cookie_auth'], $hash, time() - 3600, $auth_conf['cookie_path'], $auth_conf['cookie_domain'], false, true);
+                        setcookie(
+                            $auth_conf['cookie_auth'],
+                            $hash,
+                            time() - 3600,
+                            $auth_conf['cookie_path'],
+                            $auth_conf['cookie_domain'],
+                            false,
+                            true
+                        );
 
-                        $this->addNewLog($uid, "CHECKSESSION_FAIL_DIFF", "IP and User Agent Different ( DB : {$db_ip} / Current : " . $ip . " ) -> UID sessions deleted, cookie deleted");
+                        $this->addNewLog(
+                            $uid,
+                            "CHECKSESSION_FAIL_DIFF",
+                            "IP and User Agent Different ( DB : {$db_ip} / Current : " . $ip . " ) -> UID sessions deleted, cookie deleted"
+                        );
 
                         return false;
-                    }
-                    else
-                    {
+                    } else {
                         $expiredate = strtotime($expiredate);
                         $currentdate = strtotime(date("Y-m-d H:i:s"));
 
-                        if($currentdate > $expiredate)
-                        {
+                        if ($currentdate > $expiredate) {
                             $this->deleteExistingSessions($uid);
 
-                            setcookie($auth_conf['cookie_auth'], $hash, time() - 3600, $auth_conf['cookie_path'], $auth_conf['cookie_domain'], false, true);
+                            setcookie(
+                                $auth_conf['cookie_auth'],
+                                $hash,
+                                time() - 3600,
+                                $auth_conf['cookie_path'],
+                                $auth_conf['cookie_domain'],
+                                false,
+                                true
+                            );
 
-                            $this->addNewLog($uid, "CHECKSESSION_FAIL_EXPIRE", "Session expired ( Expire date : {$row['expiredate']} ) -> UID sessions deleted, cookie deleted");
+                            $this->addNewLog(
+                                $uid,
+                                "CHECKSESSION_FAIL_EXPIRE",
+                                "Session expired ( Expire date : {$row['expiredate']} ) -> UID sessions deleted, cookie deleted"
+                            );
 
                             return false;
-                        }
-                        else
-                        {
-                           return $this->updateSessionIp($sid, $ip);
+                        } else {
+                            return $this->updateSessionIp($sid, $ip);
                         }
                     }
-                }
-                else
-                {
+                } else {
                     $expiredate = strtotime($expiredate);
                     $currentdate = strtotime(date("Y-m-d H:i:s"));
 
-                    if($currentdate > $expiredate)
-                    {
+                    if ($currentdate > $expiredate) {
                         $this->deleteExistingSessions($uid);
 
-                        setcookie($auth_conf['cookie_auth'], $hash, time() - 3600, $auth_conf['cookie_path'], $auth_conf['cookie_domain'], false, true);
+                        setcookie(
+                            $auth_conf['cookie_auth'],
+                            $hash,
+                            time() - 3600,
+                            $auth_conf['cookie_path'],
+                            $auth_conf['cookie_domain'],
+                            false,
+                            true
+                        );
 
-                        $this->addNewLog($uid, "AUTH_CHECKSESSION_FAIL_EXPIRE", "Session expired ( Expire date : {$row['expiredate']} ) -> UID sessions deleted, cookie deleted");
+                        $this->addNewLog(
+                            $uid,
+                            "AUTH_CHECKSESSION_FAIL_EXPIRE",
+                            "Session expired ( Expire date : {$row['expiredate']} ) -> UID sessions deleted, cookie deleted"
+                        );
 
                         return false;
-                    }
-                    else
-                    {
-                        $cookie_crc = sha1 ($hash.$auth_conf['sitekey']);
+                    } else {
+                        $cookie_crc = sha1($hash . $auth_conf['sitekey']);
 
-                        if ($db_cookie == $cookie_crc)
-                        {
+                        if ($db_cookie == $cookie_crc) {
                             return true;
-                        }
-                        else
-                        {
+                        } else {
                             $this->addNewLog($uid, "AUTH_COOKIE_FAIL_BADCRC", "Cookie Integrity failed");
 
                             return false;
@@ -636,12 +749,9 @@ class Auth
         $query = $this->dbh->prepare("SELECT * FROM users WHERE email = ?");
         $query->execute(array($email));
 
-        if(count($query->fetch()))
-        {
+        if (count($query->fetch())) {
             return false;
-        }
-        else
-        {
+        } else {
             return true;
         }
     }
@@ -657,12 +767,9 @@ class Auth
         $query = $this->dbh->prepare("SELECT * FROM users WHERE username = ?");
         $query->execute(array($username));
 
-        if(count($query->fetch()))
-        {
+        if (count($query->fetch())) {
             return false;
-        }
-        else
-        {
+        } else {
             return true;
         }
     }
@@ -704,28 +811,21 @@ class Auth
 
         $activekey = $this->getRandomKey(20);
 
-        if($this->isUserActivated($uid))
-        {
+        if ($this->isUserActivated($uid)) {
             return false;
-        }
-        else
-        {
+        } else {
             $query = $this->dbh->prepare("SELECT expiredate FROM activations WHERE uid = ?");
             $query->execute(array($uid));
-            $row = $query->fetch(PDO::FETCH_ASSOC);
+            $row = $query->fetch(\PDO::FETCH_ASSOC);
             $expiredate = $row['expiredate'];
 
-            if(count($expiredate) > 0)
-            {
+            if (count($expiredate) > 0) {
                 $expiredate = strtotime($expiredate);
                 $currentdate = strtotime(date("Y-m-d H:i:s"));
 
-                if($currentdate < $expiredate)
-                {
+                if ($currentdate < $expiredate) {
                     return false;
-                }
-                else
-                {
+                } else {
                     $this->deleteUserActivations($uid);
                 }
             }
@@ -738,7 +838,12 @@ class Auth
             if ($return) {
                 $mail_body = str_replace("{key}", $activekey, $auth_conf['activation_email']['body']);
 
-                @mail($email, $auth_conf['activation_email']['subj'], $mail_body, $auth_conf['activation_email']['head']);
+                @mail(
+                    $email,
+                    $auth_conf['activation_email']['subj'],
+                    $mail_body,
+                    $auth_conf['activation_email']['head']
+                );
             }
 
             return $return;
@@ -769,14 +874,11 @@ class Auth
     {
         $query = $this->dbh->prepare("SELECT isactive FROM users WHERE id = ?");
         $query->execute(array($uid));
-        $row = $query->fetch(PDO::FETCH_ASSOC);
+        $row = $query->fetch(\PDO::FETCH_ASSOC);
 
-        if(count($row) == 0 || $row['isactive'] == 0)
-        {
+        if (count($row) == 0 || $row['isactive'] == 0) {
             return false;
-        }
-        else
-        {
+        } else {
             return true;
         }
     }
@@ -796,10 +898,9 @@ class Auth
 
         $query = $this->dbh->prepare("SELECT expiredate FROM resets WHERE uid = ?");
         $query->execute(array($uid));
-        $row = $query->fetch(PDO::FETCH_ASSOC);
+        $row = $query->fetch(\PDO::FETCH_ASSOC);
 
-        if(count($row) == 0)
-        {
+        if (count($row) == 0) {
             $expiredate = date("Y-m-d H:i:s", strtotime("+1 day"));
 
             $query = $this->dbh->prepare("INSERT INTO resets (uid, resetkey, expiredate) VALUES (?, ?, ?)");
@@ -812,18 +913,13 @@ class Auth
             }
 
             return $return;
-        }
-        else
-        {
+        } else {
             $expiredate = strtotime($row['expiredate']);
             $currentdate = strtotime(date("Y-m-d H:i:s"));
 
-            if($currentdate < $expiredate)
-            {
+            if ($currentdate < $expiredate) {
                 return false;
-            }
-            else
-            {
+            } else {
                 $this->deleteUserResets($uid);
             }
             $expiredate = date("Y-m-d H:i:s", strtotime("+1 day"));
@@ -867,44 +963,40 @@ class Auth
 
         $ip = $this->getIp();
 
-        if($this->isBlocked($ip))
-        {
+        if ($this->isBlocked($ip)) {
             $return['code'] = 0;
             return $return;
-        }
-        else
-        {
-            if(strlen($key) > 20) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($key) < 20) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            else
-            {
+        } else {
+            if (strlen($key) > 20) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($key) < 20) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } else {
                 $query = $this->dbh->prepare("SELECT uid, expiredate FROM resets WHERE resetkey = ?");
                 $query->execute(array($key));
-                $row = $query->fetch(PDO::FETCH_ASSOC);
+                $row = $query->fetch(\PDO::FETCH_ASSOC);
 
-                if(count($row) == 0)
-                {
+                if (count($row) == 0) {
                     $this->addAttempt($ip);
 
                     $return['code'] = 2;
                     return $return;
-                }
-                else
-                {
+                } else {
                     $expiredate = strtotime($row['expiredate']);
                     $currentdate = strtotime(date("Y-m-d H:i:s"));
 
-                    if($currentdate > $expiredate)
-                    {
+                    if ($currentdate > $expiredate) {
                         $this->addAttempt($ip);
 
                         $this->deleteUserResets($row['uid']);
 
                         $return['code'] = 3;
                         return $return;
-                    }
-                    else
-                    {
+                    } else {
                         $return['code'] = 4;
                         $return['uid'] = $row['uid'];
                         return $return;
@@ -925,53 +1017,55 @@ class Auth
     {
         $return = array();
 
-             $ip = $this->getIp();
+        $ip = $this->getIp();
 
-        if($this->isBlocked($ip))
-        {
+        if ($this->isBlocked($ip)) {
             $return['code'] = 0;
             return $return;
-        }
-        else
-        {
-            if(strlen($password) != 40) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
+        } else {
+            if (strlen($password) != 40) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            }
 
             $data = $this->isResetValid($key);
 
-            if($data['code'] = 4)
-            {
+            if ($data['code'] = 4) {
                 $password = $this->getHash($password);
 
                 $query = $this->dbh->prepare("SELECT password FROM users WHERE id = ?");
                 $query->execute(array($data['uid']));
-                $row = $query->fetch(PDO::FETCH_ASSOC);
+                $row = $query->fetch(\PDO::FETCH_ASSOC);
 
-                if(count($row) == 0)
-                {
+                if (count($row) == 0) {
                     $this->addAttempt($ip);
 
                     $this->deleteUserResets($data['uid']);
 
-                    $this->addNewLog($data['uid'], "RESETPASS_FAIL_UID", "User attempted to reset password with key : {$key} -> User doesn't exist !");
+                    $this->addNewLog(
+                        $data['uid'],
+                        "RESETPASS_FAIL_UID",
+                        "User attempted to reset password with key : {$key} -> User doesn't exist !"
+                    );
 
                     $return['code'] = 3;
                     return $return;
-                }
-                else
-                {
-                    if($row['password'] == $password)
-                    {
+                } else {
+                    if ($row['password'] == $password) {
                         $this->addAttempt($ip);
 
-                        $this->addNewLog($data['uid'], "RESETPASS_FAIL_SAMEPASS", "User attempted to reset password with key : {$key} -> New password matches previous password !");
+                        $this->addNewLog(
+                            $data['uid'],
+                            "RESETPASS_FAIL_SAMEPASS",
+                            "User attempted to reset password with key : {$key} -> New password matches previous password !"
+                        );
 
                         $this->deleteUserResets($data['uid']);
 
                         $return['code'] = 4;
                         return $return;
-                    }
-                    else
-                    {
+                    } else {
                         $query = $this->dbh->prepare("UPDATE users SET password = ? WHERE id = ?");
                         $return = $query->execute(array($password, $data['uid']));
 
@@ -979,7 +1073,11 @@ class Auth
                             return false;
                         }
 
-                        $this->addNewLog($data['uid'], "RESETPASS_SUCCESS", "User attempted to reset password with key : {$key} -> Password changed, reset keys deleted !");
+                        $this->addNewLog(
+                            $data['uid'],
+                            "RESETPASS_SUCCESS",
+                            "User attempted to reset password with key : {$key} -> Password changed, reset keys deleted !"
+                        );
 
                         $this->deleteUserResets($data['uid']);
 
@@ -987,10 +1085,12 @@ class Auth
                         return $return;
                     }
                 }
-            }
-            else
-            {
-                $this->addNewLog($data['uid'], "RESETPASS_FAIL_KEY", "User attempted to reset password with key : {$key} -> Key is invalid / incorrect / expired !");
+            } else {
+                $this->addNewLog(
+                    $data['uid'],
+                    "RESETPASS_FAIL_KEY",
+                    "User attempted to reset password with key : {$key} -> Key is invalid / incorrect / expired !"
+                );
 
                 $return['code'] = 2;
                 return $return;
@@ -1008,59 +1108,74 @@ class Auth
     {
         $return = array();
 
-            $ip = $this->getIp();
+        $ip = $this->getIp();
 
-        if($this->isBlocked($ip))
-        {
+        if ($this->isBlocked($ip)) {
             $return['code'] = 0;
             return $return;
-        }
-        else
-        {
-            if(strlen($email) == 0) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($email) > 100) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($email) < 3) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            else
-            {
+        } else {
+            if (strlen($email) == 0) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($email) > 100) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($email) < 3) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } else {
                 $query = $this->dbh->prepare("SELECT id FROM users WHERE email = ?");
                 $query->execute(array($email));
-                $row = $query->fetch(PDO::FETCH_ASSOC);
+                $row = $query->fetch(\PDO::FETCH_ASSOC);
 
-                if(count($row) == 0)
-                {
+                if (count($row) == 0) {
                     $this->addAttempt($ip);
 
-                    $this->addNewLog("", "RESENDACTIVATION_FAIL_EMAIL", "User attempted to resend activation email for the email : {$email} -> Email doesn't exist in DB !");
+                    $this->addNewLog(
+                        "",
+                        "RESENDACTIVATION_FAIL_EMAIL",
+                        "User attempted to resend activation email for the email : {$email} -> Email doesn't exist in DB !"
+                    );
 
                     $return['code'] = 2;
                     return $return;
-                }
-                else
-                {
-                    if($this->isUserActivated($row['uid']))
-                    {
+                } else {
+                    if ($this->isUserActivated($row['uid'])) {
                         $this->addAttempt($ip);
 
-                        $this->addNewLog($row['uid'], "RESENDACTIVATION_FAIL_ACTIVATED", "User attempted to resend activation email for the email : {$email} -> Account is already activated !");
+                        $this->addNewLog(
+                            $row['uid'],
+                            "RESENDACTIVATION_FAIL_ACTIVATED",
+                            "User attempted to resend activation email for the email : {$email} -> Account is already activated !"
+                        );
 
                         $return['code'] = 3;
                         return $return;
-                    }
-                    else
-                    {
-                        if($this->addActivation($row['uid'], $email))
-                        {
-                            $this->addNewLog($row['uid'], "RESENDACTIVATION_SUCCESS", "Activation email was resent to the email : {$email}");
+                    } else {
+                        if ($this->addActivation($row['uid'], $email)) {
+                            $this->addNewLog(
+                                $row['uid'],
+                                "RESENDACTIVATION_SUCCESS",
+                                "Activation email was resent to the email : {$email}"
+                            );
 
                             $return['code'] = 5;
                             return $return;
-                        }
-                        else
-                        {
+                        } else {
                             $this->addAttempt($ip);
 
-                            $this->addNewLog($row['uid'], "RESENDACTIVATION_FAIL_EXIST", "User attempted to resend activation email for the email : {$email} -> Activation request already exists. 24 hour expire wait required !");
+                            $this->addNewLog(
+                                $row['uid'],
+                                "RESENDACTIVATION_FAIL_EXIST",
+                                "User attempted to resend activation email for the email : {$email} -> Activation request already exists. 24 hour expire wait required !"
+                            );
 
                             $return['code'] = 4;
                             return $return;
@@ -1079,19 +1194,16 @@ class Auth
 
     public function sessionUID($hash)
     {
-        if(strlen($hash) != 40) { return false; }
-        else
-        {
+        if (strlen($hash) != 40) {
+            return false;
+        } else {
             $query = $this->dbh->prepare("SELECT uid FROM sessions WHERE hash = ?");
             $query->execute(array($hash));
-            $row = $query->fetch(PDO::FETCH_ASSOC);
+            $row = $query->fetch(\PDO::FETCH_ASSOC);
 
-            if(count($row) == 0)
-            {
+            if (count($row) == 0) {
                 return false;
-            }
-            else
-            {
+            } else {
                 return $row['uid'];
             }
         }
@@ -1111,62 +1223,71 @@ class Auth
 
         $ip = $this->getIp();
 
-        if($this->isBlocked($ip))
-        {
+        if ($this->isBlocked($ip)) {
             $return['code'] = 0;
             return $return;
-        }
-        else
-        {
-            if(strlen($currpass) != 40) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($newpass) != 40) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            else
-            {
+        } else {
+            if (strlen($currpass) != 40) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($newpass) != 40) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } else {
                 $currpass = $this->getHash($currpass);
                 $newpass = $this->getHash($newpass);
 
                 $query = $this->dbh->prepare("SELECT password FROM users WHERE id = ?");
                 $query->execute(array($uid));
-                $row = $query->fetch(PDO::FETCH_ASSOC);
+                $row = $query->fetch(\PDO::FETCH_ASSOC);
 
-                if(count($row) == 0)
-                {
+                if (count($row) == 0) {
                     $this->addAttempt($ip);
 
-                    $this->addNewLog($uid, "CHANGEPASS_FAIL_UID", "User attempted to change password for the UID : {$uid} -> UID doesn't exist !");
+                    $this->addNewLog(
+                        $uid,
+                        "CHANGEPASS_FAIL_UID",
+                        "User attempted to change password for the UID : {$uid} -> UID doesn't exist !"
+                    );
 
                     $return['code'] = 2;
                     return $return;
-                }
-                else
-                {
-                    if($currpass != $newpass)
-                    {
-                        if($currpass == $row['password'])
-                        {
+                } else {
+                    if ($currpass != $newpass) {
+                        if ($currpass == $row['password']) {
                             $query = $this->dbh->prepare("UPDATE users SET password = ? WHERE id = ?");
                             $query->execute(array($newpass, $uid));
 
-                            $this->addNewLog($uid, "CHANGEPASS_SUCCESS", "User changed the password for the UID : {$uid}");
+                            $this->addNewLog(
+                                $uid,
+                                "CHANGEPASS_SUCCESS",
+                                "User changed the password for the UID : {$uid}"
+                            );
 
                             $return['code'] = 5;
                             return $return;
-                        }
-                        else
-                        {
+                        } else {
                             $this->addAttempt($ip);
 
-                            $this->addNewLog($uid, "CHANGEPASS_FAIL_PASSWRONG", "User attempted to change password for the UID : {$uid} -> Current password incorrect !");
+                            $this->addNewLog(
+                                $uid,
+                                "CHANGEPASS_FAIL_PASSWRONG",
+                                "User attempted to change password for the UID : {$uid} -> Current password incorrect !"
+                            );
 
                             $return['code'] = 4;
                             return $return;
                         }
-                    }
-                    else
-                    {
+                    } else {
                         $this->addAttempt($ip);
 
-                        $this->addNewLog($uid, "CHANGEPASS_FAIL_PASSMATCH", "User attempted to change password for the UID : {$uid} -> New password matches current password !");
+                        $this->addNewLog(
+                            $uid,
+                            "CHANGEPASS_FAIL_PASSMATCH",
+                            "User attempted to change password for the UID : {$uid} -> New password matches current password !"
+                        );
 
                         $return['code'] = 3;
                         return $return;
@@ -1186,14 +1307,11 @@ class Auth
     {
         $query = $this->dbh->prepare("SELECT email FROM users WHERE id = ?");
         $query->execute(array($uid));
-        $row = $query->fetch(PDO::FETCH_ASSOC);
+        $row = $query->fetch(\PDO::FETCH_ASSOC);
 
-        if(count($row) == 0)
-        {
+        if (count($row) == 0) {
             return false;
-        }
-        else
-        {
+        } else {
             return $row['email'];
         }
     }
@@ -1212,50 +1330,62 @@ class Auth
 
         $ip = $this->getIp();
 
-        if($this->isBlocked($ip))
-        {
+        if ($this->isBlocked($ip)) {
             $return['code'] = 0;
             return $return;
-        }
-        else
-        {
-            if(strlen($email) == 0) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($email) > 100) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($email) < 3) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            elseif(strlen($password) != 40) { $return['code'] = 1; $this->addAttempt($ip); return $return; }
-            else
-            {
+        } else {
+            if (strlen($email) == 0) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($email) > 100) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($email) < 3) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } elseif (strlen($password) != 40) {
+                $return['code'] = 1;
+                $this->addAttempt($ip);
+                return $return;
+            } else {
                 $password = $this->getHash($password);
 
                 $query = $this->dbh->prepare("SELECT password, email FROM users WHERE id = ?");
                 $query->execute(array($uid));
-                $row = $query->fetch(PDO::FETCH_ASSOC);
+                $row = $query->fetch(\PDO::FETCH_ASSOC);
 
-                if(count($row))
-                {
+                if (count($row)) {
                     $this->addAttempt($ip);
 
-                    $this->addNewLog($uid, "CHANGEEMAIL_FAIL_UID", "User attempted to change email for the UID : {$uid} -> UID doesn't exist !");
+                    $this->addNewLog(
+                        $uid,
+                        "CHANGEEMAIL_FAIL_UID",
+                        "User attempted to change email for the UID : {$uid} -> UID doesn't exist !"
+                    );
 
                     $return['code'] = 2;
                     return $return;
-                }
-                else
-                {
-                    if($password == $row['password'])
-                    {
-                        if($email == $row['email'])
-                        {
+                } else {
+                    if ($password == $row['password']) {
+                        if ($email == $row['email']) {
                             $this->addAttempt($ip);
 
-                            $this->addNewLog($uid, "CHANGEEMAIL_FAIL_EMAILMATCH", "User attempted to change email for the UID : {$uid} -> New Email address matches current email !");
+                            $this->addNewLog(
+                                $uid,
+                                "CHANGEEMAIL_FAIL_EMAILMATCH",
+                                "User attempted to change email for the UID : {$uid} -> New Email address matches current email !"
+                            );
 
                             $return['code'] = 4;
                             return $return;
-                        }
-                        else
-                        {
+                        } else {
                             $query = $this->dbh->prepare("UPDATE users SET email = ? WHERE id = ?");
                             $return = $query->execute(array($email, $uid));
 
@@ -1263,17 +1393,23 @@ class Auth
                                 return false;
                             }
 
-                            $this->addNewLog($uid, "CHANGEEMAIL_SUCCESS", "User changed email address for UID : {$uid}");
+                            $this->addNewLog(
+                                $uid,
+                                "CHANGEEMAIL_SUCCESS",
+                                "User changed email address for UID : {$uid}"
+                            );
 
                             $return['code'] = 5;
                             return $return;
                         }
-                    }
-                    else
-                    {
+                    } else {
                         $this->addAttempt($ip);
 
-                        $this->addNewLog($uid, "CHANGEEMAIL_FAIL_PASS", "User attempted to change email for the UID : {$uid} -> Password is incorrect !");
+                        $this->addNewLog(
+                            $uid,
+                            "CHANGEEMAIL_FAIL_PASS",
+                            "User attempted to change email for the UID : {$uid} -> Password is incorrect !"
+                        );
 
                         $return['code'] = 3;
                         return $return;
@@ -1293,40 +1429,28 @@ class Auth
     {
         $query = $this->dbh->prepare("SELECT count, expiredate FROM attempts WHERE ip = ?");
         $query->execute(array($ip));
-        $row = $query->fetch(PDO::FETCH_ASSOC);
+        $row = $query->fetch(\PDO::FETCH_ASSOC);
 
-        if(count($row) == 0)
-        {
+        if (count($row) == 0) {
             return false;
-        }
-        else
-        {
-            if($row['count'] == 5)
-            {
+        } else {
+            if ($row['count'] == 5) {
                 $expiredate = strtotime($row['expiredate']);
                 $currentdate = strtotime(date("Y-m-d H:i:s"));
 
-                if($currentdate < $expiredate)
-                {
+                if ($currentdate < $expiredate) {
                     return true;
-                }
-                else
-                {
+                } else {
                     $this->deleteAttempts($ip);
                     return false;
                 }
-            }
-            else
-            {
+            } else {
                 $expiredate = strtotime($row['$expiredate']);
                 $currentdate = strtotime(date("Y-m-d H:i:s"));
 
-                if($currentdate < $expiredate)
-                {
+                if ($currentdate < $expiredate) {
                     return false;
-                }
-                else
-                {
+                } else {
                     $this->deleteAttempts($ip);
                     return false;
                 }
@@ -1360,10 +1484,9 @@ class Auth
     {
         $query = $this->dbh->prepare("SELECT count FROM attempts WHERE ip = ?");
         $query->execute(array($ip));
-        $row = $query->fetch(PDO::FETCH_ASSOC);
+        $row = $query->fetch(\PDO::FETCH_ASSOC);
 
-        if(count($row) == 0)
-        {
+        if (count($row) == 0) {
             $attempt_expiredate = date("Y-m-d H:i:s", strtotime("+30 minutes"));
             $attempt_count = 1;
 
@@ -1371,9 +1494,7 @@ class Auth
             $return = $query->execute(array($ip, $attempt_count, $attempt_expiredate));
 
             return $return;
-        }
-        else
-        {
+        } else {
             // IP Already exists in attempts table, add 1 to current count
 
             $attempt_expiredate = date("Y-m-d H:i:s", strtotime("+30 minutes"));
@@ -1397,8 +1518,7 @@ class Auth
         $chars = "_" . "A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8S9T0U1V2W3X4Y5Z6" . "_" . "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6" . "_";
         $key = "";
 
-        for($i = 0; $i < $length; $i++)
-        {
+        for ($i = 0; $i < $length; $i++) {
             $key .= $chars{mt_rand(0, strlen($chars) - 1)};
         }
 
@@ -1414,12 +1534,9 @@ class Auth
     {
         $ip = $_SERVER['REMOTE_ADDR'];
 
-        if (!empty($_SERVER['HTTP_CLIENT_IP']))
-        {
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
             $ip = $_SERVER['HTTP_CLIENT_IP'];
-        }
-        elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))
-        {
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
         }
 
@@ -1436,14 +1553,11 @@ class Auth
     {
         $query = $this->dbh->prepare("SELECT level FROM users WHERE id = ?");
         $query->execute(array($uid));
-        $row = $query->fetch(PDO::FETCH_ASSOC);
+        $row = $query->fetch(\PDO::FETCH_ASSOC);
 
-        if(count($row) == 0)
-        {
+        if (count($row) == 0) {
             return false;
-        }
-        else
-        {
+        } else {
             return $row['level'];
         }
     }
@@ -1463,21 +1577,15 @@ class Auth
         $admin_uid = $this->sessionUID($hash);
         $admin_level = $this->getLevel($admin_uid);
 
-        if ($admin_level >= $auth_conf['admin_level'])
-        {
+        if ($admin_level >= $auth_conf['admin_level']) {
             return false;
-        }
-        else
-        {
+        } else {
             $query = $this->dbh->prepare("UPDATE users SET level = ? WHERE id = ?");
             $query->execute(array($level, $uid));
 
-            if($query->rowCount() == 0)
-            {
+            if ($query->rowCount() == 0) {
                 return false;
-            }
-            else
-            {
+            } else {
                 return true;
             }
         }
@@ -1493,14 +1601,11 @@ class Auth
     {
         $query = $this->dbh->prepare("SELECT lang FROM sessions WHERE hash = ?");
         $query->execute(array($hash));
-        $row = $query->fetch(PDO::FETCH_ASSOC);
+        $row = $query->fetch(\PDO::FETCH_ASSOC);
 
-        if(count($row) == 0)
-        {
+        if (count($row) == 0) {
             return "en";
-        }
-        else
-        {
+        } else {
             return $row['lang'];
         }
     }
@@ -1517,26 +1622,18 @@ class Auth
         $query = $this->dbh->prepare("UPDATE sessions SET lang = ? WHERE hash = ?");
         $query->execute(array($lang, $hash));
 
-        if($query->rowCount() == 0)
-        {
+        if ($query->rowCount() == 0) {
             return false;
-        }
-        else
-        {
+        } else {
             $uid = $this->sessionUID($hash);
             $query = $this->dbh->prepare("UPDATE users SET lang = ? WHERE id = ?");
             $query->execute(array($lang, $uid));
 
-            if($query->rowCount() == 0)
-            {
+            if ($query->rowCount() == 0) {
                 return false;
-            }
-            else
-            {
+            } else {
                 return true;
             }
         }
     }
 }
-
-?>
