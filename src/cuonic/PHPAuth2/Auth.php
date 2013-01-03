@@ -208,6 +208,8 @@ class Auth
 
     public function activate($activekey)
     {
+        include("config.php");
+        
         $return = array();
 
         $ip = $this->getIp();
@@ -225,7 +227,7 @@ class Auth
                 $this->addAttempt($ip);
                 return $return;
             } else {
-                $query = $this->dbh->prepare("SELECT uid, expiredate FROM activations WHERE activekey = ?");
+                $query = $this->dbh->prepare("SELECT uid, expiredate FROM ".$auth_conf['table_activations']." WHERE activekey = ?");
                 $query->execute(array($activekey));
                 $row = $query->fetch(\PDO::FETCH_ASSOC);
 
@@ -248,7 +250,7 @@ class Auth
                         if ($currentdate < $expiredate) {
                             $isactive = 1;
 
-                            $query = $this->dbh->prepare("UPDATE users SET isactive = ? WHERE id = ?");
+                            $query = $this->dbh->prepare("UPDATE ".$auth_conf['table_users']." SET isactive = ? WHERE id = ?");
                             $query->execute(array($isactive, $row['uid']));
 
                             $this->deleteUserActivations($row['uid']);
@@ -298,6 +300,8 @@ class Auth
 
     public function requestReset($email)
     {
+        include("config.php")
+
         $return = array();
 
         $ip = $this->getIp();
@@ -323,7 +327,7 @@ class Auth
                 $this->addAttempt($ip);
                 return $return;
             } else {
-                $query = $this->dbh->prepare("SELECT id FROM users WHERE email = ?");
+                $query = $this->dbh->prepare("SELECT id FROM ".$auth_conf['table_users']." WHERE email = ?");
                 $query->execute(array($email));
                 $row = $query->fetch(\PDO::FETCH_ASSOC);
 
@@ -438,11 +442,13 @@ class Auth
 
     private function getUserData($username)
     {
+        include("config.php")        
+        
         $data = array();
 
         $data['username'] = $username;
 
-        $query = $this->dbh->prepare("SELECT id, password, email, salt, lang, isactive FROM users WHERE username = ?");
+        $query = $this->dbh->prepare("SELECT id, password, email, salt, lang, isactive FROM ".$auth_conf['table_users']." WHERE username = ?");
         $query->execute(array($username));
         $data = $query->fetch(\PDO::FETCH_ASSOC);
 
@@ -466,7 +472,7 @@ class Auth
     {
         include("config.php");
 
-        $query = $this->dbh->prepare("SELECT salt, lang FROM users WHERE id = ?");
+        $query = $this->dbh->prepare("SELECT salt, lang FROM ".$auth_conf['table_users']." WHERE id = ?");
         $query->execute(array($uid));
         $data = $query->fetch(\PDO::FETCH_ASSOC);
         $data['hash'] = sha1($data['salt'] . microtime());
@@ -482,7 +488,7 @@ class Auth
 
 
         $query = $this->dbh->prepare(
-            "INSERT INTO sessions (uid, hash, expiredate, ip, agent, cookie_crc, lang) VALUES (?, ?, ?, ?, ?, ?, ?)"
+            "INSERT INTO ".$auth_conf['table_sessions']." (uid, hash, expiredate, ip, agent, cookie_crc, lang) VALUES (?, ?, ?, ?, ?, ?, ?)"
         );
         $query->execute(array($uid, $data['hash'], $data['expire'], $ip, $agent, $data['cookie_crc'], $data['lang']));
 
@@ -497,7 +503,9 @@ class Auth
 
     private function deleteExistingSessions($uid)
     {
-        $query = $this->dbh->prepare("DELETE FROM sessions WHERE uid = ?");
+        include("config.php")
+        
+        $query = $this->dbh->prepare("DELETE FROM ".$auth_conf['table_sessions']." WHERE uid = ?");
         $return = $query->execute(array($uid));
 
         return $return;
@@ -511,7 +519,9 @@ class Auth
 
     private function deleteSession($hash)
     {
-        $query = $this->dbh->prepare("DELETE FROM sessions WHERE hash = ?");
+        include("config.php")
+        
+        $query = $this->dbh->prepare("DELETE FROM ".$auth_conf['table_sessions']." WHERE hash = ?");
         $return = $query->execute(array($hash));
 
         return $return;
@@ -525,14 +535,16 @@ class Auth
 
     public function getUsername($hash)
     {
-        $query = $this->dbh->prepare("SELECT uid FROM sessions WHERE hash = ?");
+        include("config.php")
+        
+        $query = $this->dbh->prepare("SELECT uid FROM ".$auth_conf['table_sessions']." WHERE hash = ?");
         $query->execute(array($hash));
         $row = $query->fetch(\PDO::FETCH_ASSOC);
 
         if (count($row) == 0) {
             return false;
         } else {
-            $query = $this->dbh->prepare("SELECT username FROM users WHERE id = ?");
+            $query = $this->dbh->prepare("SELECT username FROM ".$auth_conf['table_users']." WHERE id = ?");
             $query->execute(array($row['uid']));
             $row = $query->fetch(\PDO::FETCH_ASSOC);
 
@@ -554,6 +566,8 @@ class Auth
 
     private function addNewLog($uid = 'UNKNOWN', $action, $info)
     {
+        include("config.php")
+        
         if (strlen($uid) == 0) {
             $uid = "UNKNOWN";
         } elseif (strlen($action) == 0) {
@@ -567,7 +581,7 @@ class Auth
         } else {
             $ip = $this->getIp();
 
-            $query = $this->dbh->prepare("INSERT INTO log (username, action, info, ip) VALUES (?, ?, ?, ?)");
+            $query = $this->dbh->prepare("INSERT INTO ".$auth_conf['table_log']." (username, action, info, ip) VALUES (?, ?, ?, ?)");
             $return = $query->execute(array($uid, $action, $info, $ip));
 
             return $return;
@@ -603,7 +617,7 @@ class Auth
             }
 
             $query = $this->dbh->prepare(
-                "SELECT id, uid, expiredate, ip, agent, cookie_crc FROM sessions WHERE hash = ?"
+                "SELECT id, uid, expiredate, ip, agent, cookie_crc FROM ".$auth_conf['table_sessions']." WHERE hash = ?"
             );
             $query->execute(array($hash));
             $row = $query->fetch(\PDO::FETCH_ASSOC);
@@ -732,7 +746,9 @@ class Auth
 
     private function updateSessionIp($sid, $ip)
     {
-        $query = $this->dbh->prepare("UPDATE sessions SET ip = ? WHERE id = ?");
+        include("config.php")
+        
+        $query = $this->dbh->prepare("UPDATE ".$auth_conf['table_sessions']." SET ip = ? WHERE id = ?");
         $return = $query->execute(array($ip, $sid));
 
         return $return;
@@ -746,7 +762,9 @@ class Auth
 
     private function isEmailTaken($email)
     {
-        $query = $this->dbh->prepare("SELECT * FROM users WHERE email = ?");
+        include("config.php")
+        
+        $query = $this->dbh->prepare("SELECT * FROM ".$auth_conf['table_users']." WHERE email = ?");
         $query->execute(array($email));
 
         if (count($query->fetch())) {
@@ -764,7 +782,9 @@ class Auth
 
     private function isUsernameTaken($username)
     {
-        $query = $this->dbh->prepare("SELECT * FROM users WHERE username = ?");
+        include("config.php")
+        
+        $query = $this->dbh->prepare("SELECT * FROM ".$auth_conf['table_users']." WHERE username = ?");
         $query->execute(array($username));
 
         if (count($query->fetch())) {
@@ -784,12 +804,14 @@ class Auth
 
     private function addUser($email, $username, $password)
     {
+        include("config.php")
+        
         $username = htmlentities($username);
         $email = htmlentities($email);
 
         $salt = $this->getRandomKey(20);
 
-        $query = $this->dbh->prepare("INSERT INTO users (username, password, email, salt) VALUES (?, ?, ?, ?)");
+        $query = $this->dbh->prepare("INSERT INTO ".$auth_conf['table_users']." (username, password, email, salt) VALUES (?, ?, ?, ?)");
         $query->execute(array($username, $password, $email, $salt));
         $user = $this->getUserData($username);
 
@@ -814,7 +836,7 @@ class Auth
         if ($this->isUserActivated($uid)) {
             return false;
         } else {
-            $query = $this->dbh->prepare("SELECT expiredate FROM activations WHERE uid = ?");
+            $query = $this->dbh->prepare("SELECT expiredate FROM ".$auth_conf['table_activations']." WHERE uid = ?");
             $query->execute(array($uid));
             $row = $query->fetch(\PDO::FETCH_ASSOC);
             $expiredate = $row['expiredate'];
@@ -832,7 +854,7 @@ class Auth
 
             $expiredate = date("Y-m-d H:i:s", strtotime("+1 day"));
 
-            $query = $this->dbh->prepare("INSERT INTO activations (uid, activekey, expiredate) VALUES (?, ?, ?)");
+            $query = $this->dbh->prepare("INSERT INTO ".$auth_conf['table_activations']." (uid, activekey, expiredate) VALUES (?, ?, ?)");
             $return = $query->execute(array($uid, $activekey, $expiredate));
 
             if ($return) {
@@ -858,7 +880,9 @@ class Auth
 
     private function deleteUserActivations($uid)
     {
-        $query = $this->dbh->prepare("DELETE FROM activations WHERE uid = ?");
+        include("config.php")        
+        
+        $query = $this->dbh->prepare("DELETE FROM ".$auth_conf['table_activations']." WHERE uid = ?");
         $return = $query->execute(array($uid));
 
         return $return;
@@ -872,7 +896,9 @@ class Auth
 
     private function isUserActivated($uid)
     {
-        $query = $this->dbh->prepare("SELECT isactive FROM users WHERE id = ?");
+        include("config.php")        
+        
+        $query = $this->dbh->prepare("SELECT isactive FROM ".$auth_conf['table_users']." WHERE id = ?");
         $query->execute(array($uid));
         $row = $query->fetch(\PDO::FETCH_ASSOC);
 
@@ -896,14 +922,14 @@ class Auth
 
         $resetkey = $this->getRandomKey(20);
 
-        $query = $this->dbh->prepare("SELECT expiredate FROM resets WHERE uid = ?");
+        $query = $this->dbh->prepare("SELECT expiredate FROM ".$auth_conf['table_resets']." WHERE uid = ?");
         $query->execute(array($uid));
         $row = $query->fetch(\PDO::FETCH_ASSOC);
 
         if (count($row) == 0) {
             $expiredate = date("Y-m-d H:i:s", strtotime("+1 day"));
 
-            $query = $this->dbh->prepare("INSERT INTO resets (uid, resetkey, expiredate) VALUES (?, ?, ?)");
+            $query = $this->dbh->prepare("INSERT INTO ".$auth_conf['table_resets']." (uid, resetkey, expiredate) VALUES (?, ?, ?)");
             $return = $query->execute(array($uid, $resetkey, $expiredate));
 
             if ($return) {
@@ -924,7 +950,7 @@ class Auth
             }
             $expiredate = date("Y-m-d H:i:s", strtotime("+1 day"));
 
-            $query = $this->dbh->prepare("INSERT INTO resets (uid, resetkey, expiredate) VALUES (?, ?, ?)");
+            $query = $this->dbh->prepare("INSERT INTO ".$auth_conf['table_resets']." (uid, resetkey, expiredate) VALUES (?, ?, ?)");
             $return = $query->execute(array($uid, $resetkey, $expiredate));
 
             if ($return) {
@@ -945,7 +971,9 @@ class Auth
 
     private function deleteUserResets($uid)
     {
-        $query = $this->dbh->prepare("DELETE FROM resets WHERE uid = ?");
+        include("config.php")        
+        
+        $query = $this->dbh->prepare("DELETE FROM ".$auth_conf['table_resets']." WHERE uid = ?");
         $return = $query->execute(array($uid));
 
         return $return;
@@ -959,6 +987,8 @@ class Auth
 
     public function isResetValid($key)
     {
+        include("config.php")        
+        
         $return = array();
 
         $ip = $this->getIp();
@@ -976,7 +1006,7 @@ class Auth
                 $this->addAttempt($ip);
                 return $return;
             } else {
-                $query = $this->dbh->prepare("SELECT uid, expiredate FROM resets WHERE resetkey = ?");
+                $query = $this->dbh->prepare("SELECT uid, expiredate FROM ".$auth_conf['table_resets']." WHERE resetkey = ?");
                 $query->execute(array($key));
                 $row = $query->fetch(\PDO::FETCH_ASSOC);
 
@@ -1015,6 +1045,8 @@ class Auth
 
     public function resetPass($key, $password)
     {
+        include("config.php")        
+        
         $return = array();
 
         $ip = $this->getIp();
@@ -1034,7 +1066,7 @@ class Auth
             if ($data['code'] = 4) {
                 $password = $this->getHash($password);
 
-                $query = $this->dbh->prepare("SELECT password FROM users WHERE id = ?");
+                $query = $this->dbh->prepare("SELECT password FROM ".$auth_conf['table_users']." WHERE id = ?");
                 $query->execute(array($data['uid']));
                 $row = $query->fetch(\PDO::FETCH_ASSOC);
 
@@ -1066,7 +1098,7 @@ class Auth
                         $return['code'] = 4;
                         return $return;
                     } else {
-                        $query = $this->dbh->prepare("UPDATE users SET password = ? WHERE id = ?");
+                        $query = $this->dbh->prepare("UPDATE ".$auth_conf['table_users']." SET password = ? WHERE id = ?");
                         $return = $query->execute(array($password, $data['uid']));
 
                         if (!$return) {
@@ -1106,6 +1138,8 @@ class Auth
 
     public function resendActivation($email)
     {
+        include("config.php")
+
         $return = array();
 
         $ip = $this->getIp();
@@ -1131,7 +1165,7 @@ class Auth
                 $this->addAttempt($ip);
                 return $return;
             } else {
-                $query = $this->dbh->prepare("SELECT id FROM users WHERE email = ?");
+                $query = $this->dbh->prepare("SELECT id FROM ".$auth_conf['table_users']." WHERE email = ?");
                 $query->execute(array($email));
                 $row = $query->fetch(\PDO::FETCH_ASSOC);
 
@@ -1194,10 +1228,12 @@ class Auth
 
     public function sessionUID($hash)
     {
+        include("config.php")        
+        
         if (strlen($hash) != 40) {
             return false;
         } else {
-            $query = $this->dbh->prepare("SELECT uid FROM sessions WHERE hash = ?");
+            $query = $this->dbh->prepare("SELECT uid FROM ".$auth_conf['table_sessions']." WHERE hash = ?");
             $query->execute(array($hash));
             $row = $query->fetch(\PDO::FETCH_ASSOC);
 
@@ -1219,6 +1255,8 @@ class Auth
 
     public function changePassword($uid, $currpass, $newpass)
     {
+        include("config.php")        
+        
         $return = array();
 
         $ip = $this->getIp();
@@ -1239,7 +1277,7 @@ class Auth
                 $currpass = $this->getHash($currpass);
                 $newpass = $this->getHash($newpass);
 
-                $query = $this->dbh->prepare("SELECT password FROM users WHERE id = ?");
+                $query = $this->dbh->prepare("SELECT password FROM ".$auth_conf['table_users']." WHERE id = ?");
                 $query->execute(array($uid));
                 $row = $query->fetch(\PDO::FETCH_ASSOC);
 
@@ -1257,7 +1295,7 @@ class Auth
                 } else {
                     if ($currpass != $newpass) {
                         if ($currpass == $row['password']) {
-                            $query = $this->dbh->prepare("UPDATE users SET password = ? WHERE id = ?");
+                            $query = $this->dbh->prepare("UPDATE ".$auth_conf['table_users']." SET password = ? WHERE id = ?");
                             $query->execute(array($newpass, $uid));
 
                             $this->addNewLog(
@@ -1305,7 +1343,9 @@ class Auth
 
     public function getEmail($uid)
     {
-        $query = $this->dbh->prepare("SELECT email FROM users WHERE id = ?");
+        include("config.php")        
+        
+        $query = $this->dbh->prepare("SELECT email FROM ".$auth_conf['table_users']." WHERE id = ?");
         $query->execute(array($uid));
         $row = $query->fetch(\PDO::FETCH_ASSOC);
 
@@ -1326,6 +1366,8 @@ class Auth
 
     public function changeEmail($uid, $email, $password)
     {
+        include("config.php")        
+        
         $return = array();
 
         $ip = $this->getIp();
@@ -1357,7 +1399,7 @@ class Auth
             } else {
                 $password = $this->getHash($password);
 
-                $query = $this->dbh->prepare("SELECT password, email FROM users WHERE id = ?");
+                $query = $this->dbh->prepare("SELECT password, email FROM ".$auth_conf['table_users']." WHERE id = ?");
                 $query->execute(array($uid));
                 $row = $query->fetch(\PDO::FETCH_ASSOC);
 
@@ -1386,7 +1428,7 @@ class Auth
                             $return['code'] = 4;
                             return $return;
                         } else {
-                            $query = $this->dbh->prepare("UPDATE users SET email = ? WHERE id = ?");
+                            $query = $this->dbh->prepare("UPDATE ".$auth_conf['table_users']." SET email = ? WHERE id = ?");
                             $return = $query->execute(array($email, $uid));
 
                             if (!$return) {
@@ -1427,7 +1469,9 @@ class Auth
 
     public function isBlocked($ip)
     {
-        $query = $this->dbh->prepare("SELECT count, expiredate FROM attempts WHERE ip = ?");
+        include("config.php")        
+        
+        $query = $this->dbh->prepare("SELECT count, expiredate FROM ".$auth_conf['table_attempts']." WHERE ip = ?");
         $query->execute(array($ip));
         $row = $query->fetch(\PDO::FETCH_ASSOC);
 
@@ -1468,7 +1512,9 @@ class Auth
 
     private function deleteAttempts($ip)
     {
-        $query = $this->dbh->prepare("DELETE FROM attempts WHERE ip = ?");
+        include("config.php")        
+        
+        $query = $this->dbh->prepare("DELETE FROM ".$auth_conf['table_attempts']." WHERE ip = ?");
         $return = $query->execute(array($ip));
 
         return $return;
@@ -1482,7 +1528,9 @@ class Auth
 
     private function addAttempt($ip)
     {
-        $query = $this->dbh->prepare("SELECT count FROM attempts WHERE ip = ?");
+        include("config.php")        
+        
+        $query = $this->dbh->prepare("SELECT count FROM ".$auth_conf['table_attempts']." WHERE ip = ?");
         $query->execute(array($ip));
         $row = $query->fetch(\PDO::FETCH_ASSOC);
 
@@ -1490,7 +1538,7 @@ class Auth
             $attempt_expiredate = date("Y-m-d H:i:s", strtotime("+30 minutes"));
             $attempt_count = 1;
 
-            $query = $this->dbh->prepare("INSERT INTO attempts (ip, count, expiredate) VALUES (?, ?, ?)");
+            $query = $this->dbh->prepare("INSERT INTO ".$auth_conf['table_attempts']." (ip, count, expiredate) VALUES (?, ?, ?)");
             $return = $query->execute(array($ip, $attempt_count, $attempt_expiredate));
 
             return $return;
@@ -1500,7 +1548,7 @@ class Auth
             $attempt_expiredate = date("Y-m-d H:i:s", strtotime("+30 minutes"));
             $attempt_count = $row['count']++;
 
-            $query = $this->dbh->prepare("UPDATE attempts SET count=?, expiredate=? WHERE ip=?");
+            $query = $this->dbh->prepare("UPDATE ".$auth_conf['table_attempts']." SET count=?, expiredate=? WHERE ip=?");
             $return = $query->execute(array($attempt_count, $attempt_expiredate, $ip));
 
             return $return;
@@ -1532,15 +1580,15 @@ class Auth
 
     private function getIp()
     {
-        $ip = $_SERVER['REMOTE_ADDR'];
-
-        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-            $ip = $_SERVER['HTTP_CLIENT_IP'];
-        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR') as $key) {
+            if (array_key_exists($key, $_SERVER) === true)  {
+                foreach (array_map('trim', explode(',', $_SERVER[$key])) as $ip) {
+                    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
+                        return $ip;
+                    }
+                }
+            }
         }
-
-        return $ip;
     }
 
     /*
@@ -1551,7 +1599,9 @@ class Auth
 
     public function getLevel($uid)
     {
-        $query = $this->dbh->prepare("SELECT level FROM users WHERE id = ?");
+        include("config.php")
+        
+        $query = $this->dbh->prepare("SELECT level FROM ".$auth_conf['table_users']." WHERE id = ?");
         $query->execute(array($uid));
         $row = $query->fetch(\PDO::FETCH_ASSOC);
 
@@ -1580,7 +1630,7 @@ class Auth
         if ($admin_level >= $auth_conf['admin_level']) {
             return false;
         } else {
-            $query = $this->dbh->prepare("UPDATE users SET level = ? WHERE id = ?");
+            $query = $this->dbh->prepare("UPDATE ".$auth_conf['table_users']." SET level = ? WHERE id = ?");
             $query->execute(array($level, $uid));
 
             if ($query->rowCount() == 0) {
@@ -1599,7 +1649,9 @@ class Auth
 
     public function getLang($hash)
     {
-        $query = $this->dbh->prepare("SELECT lang FROM sessions WHERE hash = ?");
+        include("config.php")
+        
+        $query = $this->dbh->prepare("SELECT lang FROM ".$auth_conf['table_sessions']." WHERE hash = ?");
         $query->execute(array($hash));
         $row = $query->fetch(\PDO::FETCH_ASSOC);
 
@@ -1619,14 +1671,16 @@ class Auth
 
     public function putLang($hash, $lang)
     {
-        $query = $this->dbh->prepare("UPDATE sessions SET lang = ? WHERE hash = ?");
+       include("config.php")
+       
+       $query = $this->dbh->prepare("UPDATE ".$auth_conf['table_sessions']." SET lang = ? WHERE hash = ?");
         $query->execute(array($lang, $hash));
 
         if ($query->rowCount() == 0) {
             return false;
         } else {
             $uid = $this->sessionUID($hash);
-            $query = $this->dbh->prepare("UPDATE users SET lang = ? WHERE id = ?");
+            $query = $this->dbh->prepare("UPDATE ".$auth_conf['table_users']." SET lang = ? WHERE id = ?");
             $query->execute(array($lang, $uid));
 
             if ($query->rowCount() == 0) {

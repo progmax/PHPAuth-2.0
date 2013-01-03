@@ -29,6 +29,15 @@ $auth_conf['sitekey'] = 'dk;l189654è(tyhj§!dfgdfàzgq_f4fá.';
 
 $auth_conf['admin_level'] = 99;
 
+// Name of tables
+
+$auth_conf['table_activations'] = "activations";
+$auth_conf['table_attempts'] = "attempts";
+$auth_conf['table_log'] = "log";
+$auth_conf['table_resets'] = "resets";
+$auth_conf['table_sessions'] = "sessions";
+$auth_conf['table_users'] = "users";
+
 // ------------------------
 // Auth Email Configuration :
 // ------------------------
