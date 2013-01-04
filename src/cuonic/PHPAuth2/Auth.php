@@ -300,7 +300,7 @@ class Auth
 
     public function requestReset($email)
     {
-        include("config.php")
+        include("config.php");
 
         $return = array();
 
@@ -442,7 +442,7 @@ class Auth
 
     private function getUserData($username)
     {
-        include("config.php")        
+        include("config.php");   
         
         $data = array();
 
@@ -503,7 +503,7 @@ class Auth
 
     private function deleteExistingSessions($uid)
     {
-        include("config.php")
+        include("config.php");
         
         $query = $this->dbh->prepare("DELETE FROM ".$auth_conf['table_sessions']." WHERE uid = ?");
         $return = $query->execute(array($uid));
@@ -519,7 +519,7 @@ class Auth
 
     private function deleteSession($hash)
     {
-        include("config.php")
+        include("config.php");
         
         $query = $this->dbh->prepare("DELETE FROM ".$auth_conf['table_sessions']." WHERE hash = ?");
         $return = $query->execute(array($hash));
@@ -535,7 +535,7 @@ class Auth
 
     public function getUsername($hash)
     {
-        include("config.php")
+        include("config.php");
         
         $query = $this->dbh->prepare("SELECT uid FROM ".$auth_conf['table_sessions']." WHERE hash = ?");
         $query->execute(array($hash));
@@ -566,7 +566,7 @@ class Auth
 
     private function addNewLog($uid = 'UNKNOWN', $action, $info)
     {
-        include("config.php")
+        include("config.php");
         
         if (strlen($uid) == 0) {
             $uid = "UNKNOWN";
@@ -746,7 +746,7 @@ class Auth
 
     private function updateSessionIp($sid, $ip)
     {
-        include("config.php")
+        include("config.php");
         
         $query = $this->dbh->prepare("UPDATE ".$auth_conf['table_sessions']." SET ip = ? WHERE id = ?");
         $return = $query->execute(array($ip, $sid));
@@ -762,7 +762,7 @@ class Auth
 
     private function isEmailTaken($email)
     {
-        include("config.php")
+        include("config.php");
         
         $query = $this->dbh->prepare("SELECT * FROM ".$auth_conf['table_users']." WHERE email = ?");
         $query->execute(array($email));
@@ -782,7 +782,7 @@ class Auth
 
     private function isUsernameTaken($username)
     {
-        include("config.php")
+        include("config.php");
         
         $query = $this->dbh->prepare("SELECT * FROM ".$auth_conf['table_users']." WHERE username = ?");
         $query->execute(array($username));
@@ -804,7 +804,7 @@ class Auth
 
     private function addUser($email, $username, $password)
     {
-        include("config.php")
+        include("config.php");
         
         $username = htmlentities($username);
         $email = htmlentities($email);
@@ -880,7 +880,7 @@ class Auth
 
     private function deleteUserActivations($uid)
     {
-        include("config.php")        
+        include("config.php");      
         
         $query = $this->dbh->prepare("DELETE FROM ".$auth_conf['table_activations']." WHERE uid = ?");
         $return = $query->execute(array($uid));
@@ -896,7 +896,7 @@ class Auth
 
     private function isUserActivated($uid)
     {
-        include("config.php")        
+        include("config.php");
         
         $query = $this->dbh->prepare("SELECT isactive FROM ".$auth_conf['table_users']." WHERE id = ?");
         $query->execute(array($uid));
@@ -971,7 +971,7 @@ class Auth
 
     private function deleteUserResets($uid)
     {
-        include("config.php")        
+        include("config.php");        
         
         $query = $this->dbh->prepare("DELETE FROM ".$auth_conf['table_resets']." WHERE uid = ?");
         $return = $query->execute(array($uid));
@@ -987,7 +987,7 @@ class Auth
 
     public function isResetValid($key)
     {
-        include("config.php")        
+        include("config.php");        
         
         $return = array();
 
@@ -1045,7 +1045,7 @@ class Auth
 
     public function resetPass($key, $password)
     {
-        include("config.php")        
+        include("config.php");        
         
         $return = array();
 
@@ -1138,7 +1138,7 @@ class Auth
 
     public function resendActivation($email)
     {
-        include("config.php")
+        include("config.php");
 
         $return = array();
 
@@ -1228,7 +1228,7 @@ class Auth
 
     public function sessionUID($hash)
     {
-        include("config.php")        
+        include("config.php");        
         
         if (strlen($hash) != 40) {
             return false;
@@ -1255,7 +1255,7 @@ class Auth
 
     public function changePassword($uid, $currpass, $newpass)
     {
-        include("config.php")        
+        include("config.php");        
         
         $return = array();
 
@@ -1343,7 +1343,7 @@ class Auth
 
     public function getEmail($uid)
     {
-        include("config.php")        
+        include("config.php");        
         
         $query = $this->dbh->prepare("SELECT email FROM ".$auth_conf['table_users']." WHERE id = ?");
         $query->execute(array($uid));
@@ -1366,7 +1366,7 @@ class Auth
 
     public function changeEmail($uid, $email, $password)
     {
-        include("config.php")        
+        include("config.php");        
         
         $return = array();
 
@@ -1469,7 +1469,7 @@ class Auth
 
     public function isBlocked($ip)
     {
-        include("config.php")        
+        include("config.php");        
         
         $query = $this->dbh->prepare("SELECT count, expiredate FROM ".$auth_conf['table_attempts']." WHERE ip = ?");
         $query->execute(array($ip));
@@ -1512,7 +1512,7 @@ class Auth
 
     private function deleteAttempts($ip)
     {
-        include("config.php")        
+        include("config.php");        
         
         $query = $this->dbh->prepare("DELETE FROM ".$auth_conf['table_attempts']." WHERE ip = ?");
         $return = $query->execute(array($ip));
@@ -1528,7 +1528,7 @@ class Auth
 
     private function addAttempt($ip)
     {
-        include("config.php")        
+        include("config.php");        
         
         $query = $this->dbh->prepare("SELECT count FROM ".$auth_conf['table_attempts']." WHERE ip = ?");
         $query->execute(array($ip));
@@ -1599,7 +1599,7 @@ class Auth
 
     public function getLevel($uid)
     {
-        include("config.php")
+        include("config.php");
         
         $query = $this->dbh->prepare("SELECT level FROM ".$auth_conf['table_users']." WHERE id = ?");
         $query->execute(array($uid));
@@ -1649,7 +1649,7 @@ class Auth
 
     public function getLang($hash)
     {
-        include("config.php")
+        include("config.php");
         
         $query = $this->dbh->prepare("SELECT lang FROM ".$auth_conf['table_sessions']." WHERE hash = ?");
         $query->execute(array($hash));
@@ -1671,7 +1671,7 @@ class Auth
 
     public function putLang($hash, $lang)
     {
-       include("config.php")
+       include("config.php");
        
        $query = $this->dbh->prepare("UPDATE ".$auth_conf['table_sessions']." SET lang = ? WHERE hash = ?");
         $query->execute(array($lang, $hash));
