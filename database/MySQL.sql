@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `activations` (
 --
 
 CREATE TABLE IF NOT EXISTS `attempts` (
-  `ip` varchar(15) COLLATE utf8_bin NOT NULL,
+  `ip` varchar(39) COLLATE utf8_bin NOT NULL,
   `count` int(11) NOT NULL,
   `expiredate` datetime NOT NULL,
   KEY `ip` (`ip`)
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `log` (
   `username` varchar(30) COLLATE utf8_bin NOT NULL DEFAULT 'UNKNOWN' COMMENT 'Username or UID',
   `action` varchar(100) COLLATE utf8_bin NOT NULL,
   `info` varchar(1000) COLLATE utf8_bin NOT NULL DEFAULT 'None provided',
-  `ip` varchar(15) COLLATE utf8_bin NOT NULL DEFAULT '0.0.0.0',
+  `ip` varchar(39) COLLATE utf8_bin NOT NULL DEFAULT '0.0.0.0',
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   `uid` int(11) NOT NULL,
   `hash` varchar(40) COLLATE utf8_bin NOT NULL,
   `expiredate` datetime NOT NULL,
-  `ip` varchar(15) COLLATE utf8_bin NOT NULL,
+  `ip` varchar(39) COLLATE utf8_bin NOT NULL,
   `agent` varchar(200) COLLATE utf8_bin NOT NULL,
   `cookie_crc` varchar(40) COLLATE utf8_bin NOT NULL,
   `lang` char(2) COLLATE utf8_bin NOT NULL,
