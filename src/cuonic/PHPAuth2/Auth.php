@@ -1,7 +1,7 @@
 <?php
 namespace cuonic\PHPAuth2;
 
-require_once 'Config.php';
+require_once 'config.php';
 require_once 'Localization\Handler.php';
 
 class Auth
