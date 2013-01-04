@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `activations` (
 --
 
 CREATE TABLE IF NOT EXISTS `attempts` (
-  `ip` varchar(15) COLLATE utf8_bin NOT NULL,
+  `ip` varchar(39) COLLATE utf8_bin NOT NULL,
   `count` int(11) NOT NULL,
   `expiredate` datetime NOT NULL,
   KEY `ip` (`ip`)
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   `uid` int(11) NOT NULL,
   `hash` varchar(40) COLLATE utf8_bin NOT NULL,
   `expiredate` datetime NOT NULL,
-  `ip` varchar(15) COLLATE utf8_bin NOT NULL,
+  `ip` varchar(39) COLLATE utf8_bin NOT NULL,
   `agent` varchar(200) COLLATE utf8_bin NOT NULL,
   `cookie_crc` varchar(40) COLLATE utf8_bin NOT NULL,
   `lang` char(2) COLLATE utf8_bin NOT NULL,
