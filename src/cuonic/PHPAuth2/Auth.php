@@ -1738,4 +1738,28 @@ class Auth
             }
         }
     }
+    
+    /*
+    * Detects language based on HTTP_ACCEPT_LANGUAGE
+    * @return string $language
+    */
+
+    public function detectLang()
+    {
+        $language_accepted = array(
+            'en',
+            'fr',
+            'es'
+        );
+        
+        $language_default = $this->config->lang;
+        
+        $accept_lang = preg_split('",|;"', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+        
+        if(in_array($accept_lang[0], $language_accepted)) {
+            $this->config->lang = $accept_lang[0];
+        }
+        
+        return $this->config->lang;
+    }    
 }
