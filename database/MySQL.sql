@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `log` (
   `username` varchar(30) COLLATE utf8_bin NOT NULL DEFAULT 'UNKNOWN' COMMENT 'Username or UID',
   `action` varchar(100) COLLATE utf8_bin NOT NULL,
   `info` varchar(1000) COLLATE utf8_bin NOT NULL DEFAULT 'None provided',
-  `ip` varchar(15) COLLATE utf8_bin NOT NULL DEFAULT '0.0.0.0',
+  `ip` varchar(39) COLLATE utf8_bin NOT NULL DEFAULT '0.0.0.0',
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
