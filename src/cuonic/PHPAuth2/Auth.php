@@ -818,9 +818,11 @@ class Auth
         $email = htmlentities($email);
 
         $salt = $this->getRandomKey(20);
+        
+        $lang = $this->detectLang();
 
-        $query = $this->dbh->prepare("INSERT INTO ".$this->config->table_users." (username, password, email, salt) VALUES (?, ?, ?, ?)");
-        $query->execute(array($username, $password, $email, $salt));
+        $query = $this->dbh->prepare("INSERT INTO ".$this->config->table_users." (username, password, email, salt, lang) VALUES (?, ?, ?, ?, ?)");
+        $query->execute(array($username, $password, $email, $salt, $lang));
         $user = $this->getUserData($username);
 
         $this->addActivation($user['id'], $email);
