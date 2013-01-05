@@ -18,7 +18,7 @@ class Auth
         $this->config = new Config();
         $cookie_domain = ($_SERVER['HTTP_HOST'] != 'localhost') ? $_SERVER['HTTP_HOST'] : false;
         $this->config->cookie_domain = $cookie_domain;
-
+        
         $this->dbh = $dbh;
     }
 
@@ -818,9 +818,11 @@ class Auth
         $email = htmlentities($email);
 
         $salt = $this->getRandomKey(20);
+        
+        $lang = $this->detectLang();
 
-        $query = $this->dbh->prepare("INSERT INTO ".$this->config->table_users." (username, password, email, salt) VALUES (?, ?, ?, ?)");
-        $query->execute(array($username, $password, $email, $salt));
+        $query = $this->dbh->prepare("INSERT INTO ".$this->config->table_users." (username, password, email, salt, lang) VALUES (?, ?, ?, ?, ?)");
+        $query->execute(array($username, $password, $email, $salt, $lang));
         $user = $this->getUserData($username);
 
         $this->addActivation($user['id'], $email);
@@ -1738,4 +1740,24 @@ class Auth
             }
         }
     }
+    
+    /*
+    * Detects language based on HTTP_ACCEPT_LANGUAGE
+    * @return string $language
+    */
+
+    public function detectLang()
+    {
+        $language_accepted = $this->config->lang_list;
+        
+        $language_default = $this->config->lang;
+        
+        $accept_lang = preg_split('",|;"', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+        
+        if(in_array($accept_lang[0], $language_accepted)) {
+            $this->config->lang = $accept_lang[0];
+        }
+        
+        return $this->config->lang;
+    }    
 }
