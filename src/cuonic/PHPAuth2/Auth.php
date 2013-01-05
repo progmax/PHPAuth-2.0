@@ -18,7 +18,9 @@ class Auth
         $this->config = new Config();
         $cookie_domain = ($_SERVER['HTTP_HOST'] != 'localhost') ? $_SERVER['HTTP_HOST'] : false;
         $this->config->cookie_domain = $cookie_domain;
-
+        
+        $this->config->lang = $this->detectLang();
+        
         $this->dbh = $dbh;
     }
 
@@ -1746,11 +1748,7 @@ class Auth
 
     public function detectLang()
     {
-        $language_accepted = array(
-            'en',
-            'fr',
-            'es'
-        );
+        $language_accepted = $this->config->lang_list;
         
         $language_default = $this->config->lang;
         
