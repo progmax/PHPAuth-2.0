@@ -19,8 +19,6 @@ class Auth
         $cookie_domain = ($_SERVER['HTTP_HOST'] != 'localhost') ? $_SERVER['HTTP_HOST'] : false;
         $this->config->cookie_domain = $cookie_domain;
         
-        $this->config->lang = $this->detectLang();
-        
         $this->dbh = $dbh;
     }
 
