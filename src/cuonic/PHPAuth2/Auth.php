@@ -166,8 +166,8 @@ class Auth
             } else {
                 $password = $this->getHash($password);
 
-                if (!$this->isEmailTaken($email)) {
-                    if (!$this->isUsernameTaken($username)) {
+                if (!$this->isFieldTaken('email', $email)) {
+                    if (!$this->isFieldTaken('username', $username)) {
                         $uid = $this->addUser($email, $username, $password);
 
                         $this->addNewLog(
@@ -738,41 +738,26 @@ class Auth
     }
 
     /*
-    * Checks if an email is already in use
-    * @param string $email
+    * Checks if a given field already exists
+	* @param string $field
+    * @param string $value
     * @return boolean
     */
 
-    private function isEmailTaken($email)
+    private function isFieldTaken($field, $value)
     {
-        $query = $this->dbh->prepare("SELECT * FROM ".$this->config->table_users." WHERE email = ?");
-        $query->execute(array($email));
-		$row = $query->fetch(\PDO::FETCH_ASSOC);
+		$fields = array('email', 'username');
 
-        if (!$row) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    /*
-    * Checks if a username is already in use
-    * @param string $username
-    * @return boolean
-    */
-
-    private function isUsernameTaken($username)
-    {
-        $query = $this->dbh->prepare("SELECT * FROM ".$this->config->table_users." WHERE username = ?");
-        $query->execute(array($username));
-		$row = $query->fetch(\PDO::FETCH_ASSOC);
-
-        if (!$row) {
-            return false;
-        } else {
-            return true;
-        }
+		if(! in_array($field, $fields)) throw new Exception("Field '$field' not in safe field list");
+	
+        $query = $this->dbh->prepare("SELECT * FROM ".$this->config->table_users." WHERE ".$field." = ?");
+        $query->execute(array($value));
+		
+		if(count($query->fetch()) == 0) {
+			return false;
+		} else {
+			return true;
+		}
     }
 
     /*
