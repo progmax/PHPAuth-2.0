@@ -250,7 +250,7 @@ class Auth
                     return $return;
                 } else {
                     if (!$this->isUserActivated($row['uid'])) {
-                        $expiredate = strtotime($row['$expiredate']);
+                        $expiredate = strtotime($row['expiredate']);
                         $currentdate = strtotime(date("Y-m-d H:i:s"));
 
                         if ($currentdate < $expiredate) {
@@ -747,8 +747,9 @@ class Auth
     {
         $query = $this->dbh->prepare("SELECT * FROM ".$this->config->table_users." WHERE email = ?");
         $query->execute(array($email));
+		$row = $query->fetch(\PDO::FETCH_ASSOC);
 
-        if (count($query->fetch())) {
+        if (!$row) {
             return false;
         } else {
             return true;
@@ -765,8 +766,9 @@ class Auth
     {
         $query = $this->dbh->prepare("SELECT * FROM ".$this->config->table_users." WHERE username = ?");
         $query->execute(array($username));
+		$row = $query->fetch(\PDO::FETCH_ASSOC);
 
-        if (count($query->fetch())) {
+        if (!$row) {
             return false;
         } else {
             return true;
@@ -1178,7 +1180,7 @@ class Auth
                     $return['code'] = 2;
                     return $return;
                 } else {
-                    if ($this->isUserActivated($row['uid'])) {
+                    if ($this->isUserActivated($row['id'])) {
                         $this->addAttempt($ip);
 
                         $this->addNewLog(
@@ -1190,9 +1192,9 @@ class Auth
                         $return['code'] = 3;
                         return $return;
                     } else {
-                        if ($this->addActivation($row['uid'], $email)) {
+                        if ($this->addActivation($row['id'], $email)) {
                             $this->addNewLog(
-                                $row['uid'],
+                                $row['id'],
                                 "RESENDACTIVATION_SUCCESS",
                                 "Activation email was resent to the email : {$email}"
                             );
@@ -1203,7 +1205,7 @@ class Auth
                             $this->addAttempt($ip);
 
                             $this->addNewLog(
-                                $row['uid'],
+                                $row['id'],
                                 "RESENDACTIVATION_FAIL_EXIST",
                                 "User attempted to resend activation email for the email : {$email} -> Activation request already exists. 24 hour expire wait required !"
                             );
