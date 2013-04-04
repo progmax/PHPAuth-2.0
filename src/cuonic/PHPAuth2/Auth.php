@@ -53,7 +53,7 @@ class Auth
             $return['code'] = 1;
             $this->addAttempt($ip);
             return $return;
-        } elseif (strlen($password) != 40) {
+        } elseif (strlen($password) <= 8) { //???? old: } elseif (strlen($password) != 40) {
             $return['code'] = 1;
             $this->addAttempt($ip);
             return $return;
@@ -731,7 +731,7 @@ class Auth
         $query = $this->dbh->prepare("SELECT * FROM ".$this->config->table_users." WHERE ".$field." = ?");
         $query->execute(array($value));
 
-        return(count($query->fetch()) != 0)
+        return($query->rowCount()); //????? return(count($query->fetch()) != 0)
 	}
 
     /*
